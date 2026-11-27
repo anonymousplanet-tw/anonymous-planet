@@ -4,610 +4,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>匿名星球｜匿名聊天交友</title>
-
+<title>匿名星球</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root {
-  --primary: #7357e8;
-  --primary-dark: #5b40ce;
-  --bg: #f6f5fb;
-  --text: #24233a;
-  --muted: #8b8aa0;
-  --border: #e8e6f0;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: system-ui, "Microsoft JhengHei", sans-serif;
-  color: var(--text);
-  background: var(--bg);
-}
-
-button, input {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-
-.topbar {
-  height: 68px;
-  background: white;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 6%;
-}
-
-.logo {
-  font-size: 21px;
-  font-weight: 800;
-  color: var(--primary);
-}
-
-.online {
-  color: #18a875;
-  font-size: 13px;
-}
-
-main {
-  max-width: 1100px;
-  margin: 35px auto;
-  padding: 0 20px;
-}
-
-h1 {
-  font-size: 30px;
-  margin: 0 0 8px;
-}
-
-.subtitle {
-  color: var(--muted);
-  margin: 0 0 28px;
-}
-
-.layout {
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 22px;
-  align-items: start;
-}
-
-.panel {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 5px 25px #29204c08;
-}
-
-.panel h2 {
-  font-size: 17px;
-  margin: 0 0 20px;
-}
-
-.field {
-  margin-bottom: 20px;
-}
-
-.field label {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-input {
-  width: 100%;
-  padding: 12px 13px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  outline: none;
-  background: white;
-  color: var(--text);
-}
-
-input:focus {
-  border-color: var(--primary);
-}
-
-.gender {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.gender button {
-  border: 1px solid var(--border);
-  background: white;
-  border-radius: 10px;
-  padding: 11px 5px;
-  color: var(--text);
-}
-
-.gender button.active {
-  color: var(--primary);
-  border-color: var(--primary);
-  background: #f1edff;
-}
-
-.primary {
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 11px;
-  padding: 13px 18px;
-  font-weight: 700;
-}
-
-.primary:hover {
-  background: var(--primary-dark);
-}
-
-.secondary {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 12px 16px;
-}
-
-.full {
-  width: 100%;
-}
-
-.small-note {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.7;
-  margin-top: 16px;
-}
-
-.chat-panel {
-  padding: 0;
-  min-height: 600px;
-  overflow: hidden;
-}
-
-.chat-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.chat-header h2 {
-  margin: 0;
-  font-size: 17px;
-  overflow-wrap: anywhere;
-}
-
-.status {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-.chat-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.icon-btn {
-  border: 1px solid var(--border);
-  background: white;
-  border-radius: 9px;
-  padding: 8px 11px;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.notice {
-  margin: 12px 24px;
-  padding: 12px;
-  border-radius: 10px;
-  background: #f7f5ff;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.7;
-}
-
-.messages {
-  height: 360px;
-  padding: 24px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.welcome {
-  margin: auto;
-  text-align: center;
-  color: var(--muted);
-  line-height: 1.8;
-}
-
-.emoji {
-  font-size: 46px;
-  margin-bottom: 10px;
-}
-
-.message {
-  max-width: 80%;
-}
-
-.message.mine {
-  align-self: flex-end;
-}
-
-.sender {
-  font-size: 11px;
-  color: var(--muted);
-  margin-bottom: 5px;
-}
-
-.bubble {
-  padding: 12px 15px;
-  border-radius: 15px;
-  background: #f0eef7;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-.mine .bubble {
-  background: var(--primary);
-  color: white;
-  border-bottom-right-radius: 4px;
-}
-
-.message:not(.mine) .bubble {
-  border-bottom-left-radius: 4px;
-}
-
-.chat-bottom {
-  padding: 18px 24px 22px;
-  border-top: 1px solid var(--border);
-}
-
-.chat-bottom form {
-  display: flex;
-  gap: 10px;
-}
-
-.chat-bottom input {
-  flex: 1;
-  min-width: 0;
-}
-
-.chat-bottom button {
-  padding: 12px 20px;
-}
-
-.chat-hint {
-  color: var(--muted);
-  font-size: 11px;
-  margin-top: 10px;
-}
-
-.toast {
-  position: fixed;
-  bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #29233c;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 10px;
-  display: none;
-  z-index: 10;
-  max-width: 90%;
-  text-align: center;
-}
-
-footer {
-  text-align: center;
-  color: var(--muted);
-  font-size: 12px;
-  padding: 25px;
-}
-
-@media (max-width: 760px) {
-  main {
-    margin: 25px auto;
-    padding: 0 14px;
-  }
-
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .chat-panel {
-    min-height: 520px;
-  }
-
-  .messages {
-    height: 300px;
-  }
-
-  .topbar {
-    padding: 0 18px;
-  }
-
-  h1 {
-    font-size: 25px;
-  }
-}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f3fb;color:#29263b;font-family:Arial,"Microsoft JhengHei",sans-serif}
+header{background:white;padding:20px 7%;font-size:22px;font-weight:bold;color:#7658df;box-shadow:0 2px 10px #00000008}
+main{max-width:950px;margin:45px auto;padding:0 18px}
+h1{font-size:30px;margin-bottom:8px}
+.sub{color:#888;margin-bottom:30px}
+.layout{display:grid;grid-template-columns:330px 1fr;gap:20px}
+.card{background:white;border-radius:18px;padding:25px;box-shadow:0 5px 25px #00000008}
+h2{font-size:18px;margin-top:0}
+label{display:block;font-size:14px;font-weight:bold;margin:20px 0 8px}
+input{width:100%;padding:13px;border:1px solid #ddd;border-radius:9px;font-size:15px}
+.options{display:flex;gap:8px}
+.options button{flex:1;padding:11px 5px;border:1px solid #ddd;background:white;border-radius:9px}
+.options button.active{border-color:#7658df;color:#7658df;background:#f2efff}
+.primary{width:100%;padding:14px;border:0;border-radius:10px;background:#7658df;color:white;font-size:16px;font-weight:bold;margin-top:25px;cursor:pointer}
+.primary:disabled{opacity:.5;cursor:not-allowed}
+.status{margin-top:20px;padding:15px;background:#f5f3fb;border-radius:10px;color:#666;line-height:1.7}
+.chat{min-height:400px;display:flex;flex-direction:column}
+.chatbody{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:#888;line-height:2}
+footer{text-align:center;color:#aaa;padding:30px;font-size:12px}
+@media(max-width:700px){.layout{grid-template-columns:1fr}main{margin:25px auto}header{padding:18px}}
 </style>
 </head>
-
 <body>
-
-<header class="topbar">
-  <div class="logo">✦ 匿名星球</div>
-  <div class="online">● 前端測試版</div>
-</header>
+<header>✦ 匿名星球</header>
 
 <main>
-  <h1>遇見一個陌生人</h1>
-  <p class="subtitle">
-    不用真實姓名，從一段聊天開始認識彼此。
-  </p>
+<h1>遇見一個陌生人</h1>
+<p class="sub">不用真實姓名，從一段聊天開始認識彼此。</p>
 
-  <div class="layout">
+<div class="layout">
+<section class="card">
+<h2>你的配對條件</h2>
 
-    <!-- 配對設定 -->
-    <section class="panel">
-      <h2>你的配對條件</h2>
+<label>匿名暱稱</label>
+<input id="nickname" maxlength="20" placeholder="輸入你的暱稱">
 
-      <div class="field">
-        <label for="nickname">匿名暱稱</label>
-        <input
-          id="nickname"
-          maxlength="20"
-          placeholder="例如：今晚不睡覺"
-        >
-      </div>
+<label>你的性別</label>
+<div class="options" id="gender">
+<button data-value="male">男生</button>
+<button data-value="female">女生</button>
+<button data-value="other">其他</button>
+</div>
 
-      <div class="field">
-        <label>你的性別</label>
-        <div class="gender" id="myGender">
-          <button type="button" data-value="男">男生</button>
-          <button type="button" data-value="女">女生</button>
-          <button type="button" data-value="其他">其他</button>
-        </div>
-      </div>
+<label>想認識的對象</label>
+<div class="options" id="seeking">
+<button data-value="male">男生</button>
+<button data-value="female">女生</button>
+<button class="active" data-value="any">不限</button>
+</div>
 
-      <div class="field">
-        <label>想認識的對象</label>
-        <div class="gender" id="targetGender">
-          <button type="button" data-value="男">男生</button>
-          <button type="button" data-value="女">女生</button>
-          <button type="button" data-value="不限" class="active">
-            不限
-          </button>
-        </div>
-      </div>
+<button class="primary" id="start" disabled>正在連接...</button>
 
-      <button class="primary full" id="startBtn" type="button">
-        開始尋找聊天對象
-      </button>
+<div class="status" id="status">
+正在初始化匿名登入...
+</div>
+</section>
 
-      <p class="small-note">
-        🔒 使用匿名暱稱即可開始，目前為前端測試版，尚未連接真人配對服務。
-        請勿在聊天中透露密碼、住址或其他敏感個人資訊。
-      </p>
-    </section>
-
-    <!-- 聊天室 -->
-    <section class="panel chat-panel">
-
-      <div class="chat-header">
-        <div>
-          <h2 id="partnerName">等待配對</h2>
-          <div class="status" id="partnerStatus">
-            準備好認識新朋友了嗎？
-          </div>
-        </div>
-
-        <div class="chat-actions">
-          <button class="icon-btn" id="skipBtn" disabled>
-            換一位
-          </button>
-
-          <button class="icon-btn" id="reportBtn" disabled>
-            檢舉
-          </button>
-        </div>
-      </div>
-
-      <div class="notice">
-        這裡是匿名聊天空間。請尊重彼此，不要傳送騷擾或違法內容。
-      </div>
-
-      <div class="messages" id="messages">
-        <div class="welcome">
-          <div class="emoji">💬</div>
-          <strong>你的下一段故事，從這裡開始</strong>
-          <div>設定配對條件，尋找一位陌生聊天夥伴。</div>
-        </div>
-      </div>
-
-      <div class="chat-bottom">
-        <form id="chatForm">
-          <input
-            id="chatInput"
-            maxlength="500"
-            placeholder="接上真人配對服務後才能傳送訊息..."
-            disabled
-          >
-
-          <button class="primary" id="sendBtn" disabled>
-            傳送
-          </button>
-        </form>
-
-        <div class="chat-hint">
-          按 Enter 傳送訊息 · 請保持友善
-        </div>
-      </div>
-
-    </section>
-  </div>
+<section class="card chat">
+<h2 id="roomTitle">聊天室</h2>
+<div class="chatbody" id="chat">
+<div>
+<div style="font-size:48px">💬</div>
+<strong>你的下一段故事，從這裡開始</strong>
+<div>設定條件，尋找聊天夥伴。</div>
+</div>
+</div>
+</section>
+</div>
 </main>
 
-<footer>
-  匿名星球 · 讓每一次相遇，都從聊天開始
-</footer>
-
-<div class="toast" id="toast"></div>
+<footer>匿名星球 · 讓每一次相遇，都從聊天開始</footer>
 
 <script>
+const SUPABASE_URL = "https://rxeolvxuvhysvgwvnkmu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_JC0K_2qN8_GMv9qXFjxohQ_WGWwlPTM";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let user = null;
+let gender = "";
+let seeking = "any";
+let searching = false;
+let timer = null;
+
 const $ = id => document.getElementById(id);
 
-// 使用者設定
-let myGender = "";
-let targetGender = "不限";
-let isSearching = false;
-
-// 顯示提示訊息
-function toast(text) {
-  const box = $("toast");
-  box.textContent = text;
-  box.style.display = "block";
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => {
-    box.style.display = "none";
-  }, 2500);
-}
-
-// 性別選擇
-function bindGender(containerId, callback) {
-  const container = $(containerId);
-  container.querySelectorAll("button").forEach(button => {
-    button.addEventListener("click", () => {
-      container.querySelectorAll("button").forEach(b => {
-        b.classList.remove("active");
-      });
+function choose(container, callback) {
+  $(container).querySelectorAll("button").forEach(button => {
+    button.onclick = () => {
+      $(container).querySelectorAll("button").forEach(b => b.classList.remove("active"));
       button.classList.add("active");
       callback(button.dataset.value);
-    });
+    };
   });
 }
 
-bindGender("myGender", value => {
-  myGender = value;
-});
+choose("gender", value => gender = value);
+choose("seeking", value => seeking = value);
 
-bindGender("targetGender", value => {
-  targetGender = value;
-});
-
-// 目前尚未連接後端，因此聊天室保持關閉。
-// 等 Supabase 配對與即時訊息完成後，再啟用真正的聊天功能。
-function setChatEnabled(enabled) {
-  $("chatInput").disabled = !enabled;
-  $("sendBtn").disabled = !enabled;
-  $("skipBtn").disabled = !enabled;
-  $("reportBtn").disabled = !enabled;
-  $("chatInput").placeholder = enabled
-    ? "輸入訊息..."
-    : "配對成功後才能傳送訊息...";
+function message(title, detail) {
+  $("chat").innerHTML = "";
+  const div = document.createElement("div");
+  div.style.textAlign = "center";
+  div.style.margin = "auto";
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  const p = document.createElement("p");
+  p.textContent = detail;
+  div.append(strong, p);
+  $("chat").appendChild(div);
 }
 
-function showWelcome(title, description) {
-  $("messages").innerHTML = `
-    <div class="welcome">
-      <div class="emoji">💬</div>
-      <strong>${title}</strong>
-      <div>${description}</div>
-    </div>
-  `;
+async function initialize() {
+  try {
+    const {data, error} = await db.auth.getSession();
+    if (error) throw error;
+
+    if (data.session) {
+      user = data.session.user;
+    } else {
+      const result = await db.auth.signInAnonymously();
+      if (result.error) throw result.error;
+      user = result.data.user;
+    }
+
+    $("status").textContent = "匿名登入成功，可以開始配對。";
+    $("start").disabled = false;
+    $("start").textContent = "開始尋找聊天對象";
+  } catch (error) {
+    console.error(error);
+    $("status").textContent = "連線失敗：" + error.message;
+  }
 }
 
-// 開始等待真人配對（目前尚未連接配對伺服器）
-function findMatch() {
+async function saveProfile() {
   const nickname = $("nickname").value.trim();
 
-  if (!nickname) {
-    toast("請先輸入你的匿名暱稱");
-    $("nickname").focus();
-    return;
-  }
+  if (!nickname) throw new Error("請輸入暱稱");
+  if (!gender) throw new Error("請選擇你的性別");
 
-  if (!myGender) {
-    toast("請選擇你的性別");
-    return;
-  }
+  const {error} = await db.from("profiles").upsert({
+    id: user.id,
+    nickname: nickname,
+    gender: gender,
+    seeking: seeking
+  }, {onConflict:"id"});
 
-  if (isSearching) {
-    toast("目前正在等待配對");
-    return;
-  }
-
-  isSearching = true;
-  setChatEnabled(false);
-
-  $("partnerName").textContent = "等待真人加入";
-  $("partnerStatus").textContent = "目前尚未連接配對伺服器";
-  showWelcome(
-    "尚未連接真人配對",
-    "目前網站只有前端介面，還沒有連接 Supabase。現在不會配對到假使用者，也不會產生假訊息。"
-  );
-
-  $("startBtn").disabled = false;
-  $("startBtn").textContent = "取消等待";
-  toast("已進入等待畫面；接上後端後才能尋找真人");
+  if (error) throw error;
 }
 
-function cancelSearch() {
-  isSearching = false;
-  $("partnerName").textContent = "等待配對";
-  $("partnerStatus").textContent = "已取消等待";
-  showWelcome(
-    "等待下一段相遇",
-    "設定配對條件後，按下開始尋找聊天對象。"
-  );
-  $("startBtn").textContent = "開始尋找聊天對象";
-  $("startBtn").disabled = false;
-  setChatEnabled(false);
+async function findMatch() {
+  if (!searching) return;
+
+  try {
+    const {data, error} = await db.rpc("find_match");
+    if (error) throw error;
+
+    if (data.status === "matched") {
+      searching = false;
+      clearTimeout(timer);
+
+      $("start").disabled = false;
+      $("start").textContent = "重新配對";
+      $("roomTitle").textContent = "配對成功！";
+      $("status").textContent = "已找到聊天對象。";
+      message(
+        "🎉 真人配對成功！",
+        "聊天室已建立，訊息傳送功能還在開發中。"
+      );
+      return;
+    }
+
+    if (data.status === "waiting") {
+      $("status").textContent = "正在尋找符合條件的真人使用者...";
+      message("正在尋找聊天對象", "請稍候，配對成功後會通知你。");
+      timer = setTimeout(findMatch, 3000);
+      return;
+    }
+
+    throw new Error("配對狀態：" + data.status);
+
+  } catch (error) {
+    console.error(error);
+    searching = false;
+    $("start").disabled = false;
+    $("start").textContent = "重新開始";
+    $("status").textContent = "配對失敗：" + error.message;
+  }
 }
 
-$("startBtn").addEventListener("click", () => {
-  if (isSearching) {
-    cancelSearch();
-  } else {
-    findMatch();
+$("start").onclick = async () => {
+  if (searching) return;
+
+  $("start").disabled = true;
+  $("start").textContent = "正在保存資料...";
+
+  try {
+    await saveProfile();
+
+    searching = true;
+    $("start").textContent = "配對中...";
+    $("status").textContent = "正在連接真人配對服務...";
+    await findMatch();
+
+  } catch (error) {
+    console.error(error);
+    $("start").disabled = false;
+    $("start").textContent = "開始尋找聊天對象";
+    $("status").textContent = error.message;
   }
-});
+};
 
-// 尚未有真正聊天室，禁止送出本機假訊息
-$("chatForm").addEventListener("submit", event => {
-  event.preventDefault();
-  toast("目前尚未連接即時聊天服務");
-});
-
-// 尚未配對，因此這些操作暫時不會啟用
-$("skipBtn").addEventListener("click", () => {
-  toast("目前沒有配對中的對象");
-});
-
-$("reportBtn").addEventListener("click", () => {
-  toast("配對成功後才能檢舉對方");
-});
+initialize();
 </script>
 </body>
 </html>
