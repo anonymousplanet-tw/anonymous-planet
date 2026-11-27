@@ -54,7 +54,7 @@ let soundEnabled=localStorage.getItem('anonymous-chat-sound')!=='off';
 let audioContext=null;
 function updateSoundToggle(){const b=$('soundToggle');b.textContent=soundEnabled?'🔔 音效開':'🔕 音效關';b.setAttribute('aria-pressed',String(soundEnabled))}
 function unlockSound(){if(!soundEnabled)return;try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;if(!audioContext)audioContext=new AudioCtx();if(audioContext.state==='suspended')audioContext.resume().catch(()=>{})}catch(e){console.warn('音效無法啟用',e)}}
-function playIncomingSound(){if(!soundEnabled)return;try{if(!audioContext||audioContext.state!=='running')return;const t=audioContext.currentTime;for(const [delay,freq] of [[0,880],[0.12,1174.66]]){const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,t+delay);gain.gain.setValueAtTime(0.0001,t+delay);gain.gain.exponentialRampToValueAtTime(0.085,t+delay+0.018);gain.gain.exponentialRampToValueAtTime(0.0001,t+delay+0.19);osc.connect(gain);gain.connect(audioContext.destination);osc.start(t+delay);osc.stop(t+delay+0.2)}}catch(e){console.warn('播放提示音失敗',e)}}
+function playIncomingSound(){if(!soundEnabled)return;try{if(!audioContext||audioContext.state!=='running')return;const t=audioContext.currentTime;for(const [delay,freq] of [[0,880],[0.12,1174.66]]){const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,t+delay);gain.gain.setValueAtTime(0.0001,t+delay);gain.gain.exponentialRampToValueAtTime(0.1275,t+delay+0.018);gain.gain.exponentialRampToValueAtTime(0.0001,t+delay+0.19);osc.connect(gain);gain.connect(audioContext.destination);osc.start(t+delay);osc.stop(t+delay+0.2)}}catch(e){console.warn('播放提示音失敗',e)}}
 // 配對成功使用獨立的上行雙音；音效開關與訊息通知共用。
 function playMatchedSound(){
  if(!soundEnabled)return;
@@ -65,7 +65,7 @@ function playMatchedSound(){
    const osc=audioContext.createOscillator(),gain=audioContext.createGain();
    osc.type='sine';osc.frequency.setValueAtTime(freq,t+delay);
    gain.gain.setValueAtTime(0.0001,t+delay);
-   gain.gain.exponentialRampToValueAtTime(0.075,t+delay+0.025);
+   gain.gain.exponentialRampToValueAtTime(0.1125,t+delay+0.025);
    gain.gain.exponentialRampToValueAtTime(0.0001,t+delay+duration);
    osc.connect(gain);gain.connect(audioContext.destination);
    osc.start(t+delay);osc.stop(t+delay+duration+0.01);
