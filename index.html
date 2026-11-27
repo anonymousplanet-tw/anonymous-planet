@@ -121,7 +121,9 @@ let partnerId = null;
 let partnerNickname = "";
 let searching = false;
 let pollTimer = null;
+let roomStatusTimer = null;
 let messageChannel = null;
+let roomChannel = null;
 let displayedMessageIds = new Set();
 
 const $ = id => document.getElementById(id);
@@ -149,11 +151,25 @@ function setChatMode(active) {
   $("start").classList.toggle("hidden", active);
 }
 
-function resetChat() {
+function removeRoomSubscriptions() {
   if (messageChannel) {
     db.removeChannel(messageChannel);
     messageChannel = null;
   }
+
+  if (roomChannel) {
+    db.removeChannel(roomChannel);
+    roomChannel = null;
+  }
+
+  if (roomStatusTimer) {
+    clearInterval(roomStatusTimer);
+    roomStatusTimer = null;
+  }
+}
+
+function resetChat() {
+  removeRoomSubscriptions();
 
   roomId = null;
   partnerId = null;
@@ -292,7 +308,7 @@ function subscribeMessages() {
     db.removeChannel(messageChannel);
   }
 
-  messageChannel = db.channel("room-" + roomId)
+  messageChannel = db.channel("room-messages-" + roomId)
     .on("postgres_changes", {
       event:"INSERT",
       schema:"public",
@@ -314,6 +330,82 @@ function subscribeMessages() {
     });
 }
 
+/* 對方離開時，保留畫面上的歷史訊息 */
+function handlePartnerLeft() {
+  if (!roomId) return;
+
+  removeRoomSubscriptions();
+
+  roomId = null;
+  partnerId = null;
+  partnerNickname = "";
+
+  $("roomState").textContent = "聊天室已結束";
+  $("partnerInfo").textContent = "對方已離開聊天室";
+
+  setChatMode(false);
+
+  $("start").disabled = false;
+  $("start").textContent = "重新尋找聊天對象";
+
+  const notice = document.createElement("p");
+  notice.className = "muted";
+  notice.style.textAlign = "center";
+  notice.style.padding = "12px";
+  notice.textContent = "對方已離開聊天室。你可以重新尋找聊天對象。";
+  $("messages").appendChild(notice);
+  $("messages").scrollTop = $("messages").scrollHeight;
+
+  setStatus("對方已離開，原本的聊天紀錄仍然保留。");
+}
+
+/* 備援檢查：每 3 秒確認聊天室是否仍然有效 */
+async function checkRoomStatus() {
+  if (!roomId) return;
+
+  try {
+    const {data, error} = await db.rpc("get_current_room");
+    if (error) throw error;
+
+    if (
+      data.status !== "matched" ||
+      data.room_id !== roomId
+    ) {
+      handlePartnerLeft();
+    }
+  } catch (e) {
+    console.error("檢查聊天室狀態失敗：", e);
+  }
+}
+
+/* 監聽 rooms 資料表的 UPDATE */
+function subscribeRoomStatus() {
+  if (roomChannel) {
+    db.removeChannel(roomChannel);
+    roomChannel = null;
+  }
+
+  roomChannel = db.channel("room-status-" + roomId)
+    .on("postgres_changes", {
+      event:"UPDATE",
+      schema:"public",
+      table:"rooms",
+      filter:"id=eq." + roomId
+    }, payload => {
+      if (payload.new.status === "closed") {
+        handlePartnerLeft();
+      }
+    })
+    .subscribe(status => {
+      if (status === "CHANNEL_ERROR") {
+        console.warn("聊天室即時狀態訂閱失敗，將使用定時檢查。");
+      }
+    });
+
+  if (roomStatusTimer) clearInterval(roomStatusTimer);
+  roomStatusTimer = setInterval(checkRoomStatus, 3000);
+}
+
 async function openRoom() {
   await getPartner();
 
@@ -322,6 +414,7 @@ async function openRoom() {
 
   await loadMessages();
   subscribeMessages();
+  subscribeRoomStatus();
 
   setStatus("聊天室已連線，可以開始聊天。");
 }
@@ -410,6 +503,7 @@ $("start").onclick = async () => {
 
 async function sendMessage() {
   const content = $("messageInput").value.trim();
+
   if (!content || !roomId) return;
 
   $("send").disabled = true;
@@ -435,7 +529,10 @@ async function sendMessage() {
 $("send").onclick = sendMessage;
 
 $("messageInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") sendMessage();
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage();
+  }
 });
 
 $("refreshMessages").onclick = async () => {
@@ -461,6 +558,7 @@ $("leave").onclick = async () => {
     }
 
     resetChat();
+
     $("start").classList.remove("hidden");
     $("start").disabled = false;
     $("start").textContent = "重新尋找聊天對象";
