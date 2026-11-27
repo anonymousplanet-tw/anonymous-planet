@@ -3,186 +3,153 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>匿名聊聊</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f5f3fb;color:#29263b;font-family:Arial,"Microsoft JhengHei",sans-serif}
-header{background:#fff;padding:18px 7%;font-size:22px;font-weight:bold;color:#7658df;box-shadow:0 2px 10px #00000008}
-main{max-width:760px;margin:35px auto;padding:0 16px}
-h1{font-size:27px}
-h2{font-size:19px}
-.muted{color:#888}
-.card{background:white;border-radius:16px;padding:24px;box-shadow:0 5px 25px #00000008}
-label{display:block;font-weight:bold;font-size:14px;margin:17px 0 7px}
-input{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font-size:15px}
-button{cursor:pointer;border:0;border-radius:9px;padding:12px;font-size:14px}
+body{margin:0;background:#f4f5f8;color:#25283a;font-family:Arial,"Noto Sans TC",sans-serif}
+header{background:#fff;padding:18px 22px;border-bottom:1px solid #e8e8ee;font-size:21px;font-weight:bold}
+main{max-width:680px;margin:35px auto;padding:0 16px}
+.panel{background:#fff;border:1px solid #e8e8ee;border-radius:16px;padding:25px;box-shadow:0 5px 20px #20204008}
+h2{margin:0 0 20px;font-size:21px}
+label{display:block;margin:18px 0 8px;font-weight:bold;font-size:14px}
+input,select,textarea{width:100%;padding:13px;border:1px solid #dddde5;border-radius:9px;font-size:16px;background:#fff}
+button{border:0;border-radius:9px;padding:13px 18px;font-size:15px;cursor:pointer}
 button:disabled{opacity:.5;cursor:not-allowed}
-.primary{width:100%;background:#7658df;color:white;font-weight:bold;margin-top:20px}
-.secondary{background:#eee;color:#444}
+.primary{background:#6658df;color:white}
+.secondary{background:#eeeef5;color:#333}
 .danger{background:#fff0f0;color:#c33}
-.options{display:flex;gap:7px}
-.options button{flex:1;background:#f4f4f4}
-.options button.active{background:#eee8ff;color:#7658df;outline:1px solid #7658df}
-.status{background:#f5f3fb;padding:13px;border-radius:9px;margin-top:16px;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
-.hidden{display:none!important}
-#setupPage{max-width:500px;margin:auto}
-#chatPage{max-width:700px;margin:auto}
-.chat{min-height:540px;display:flex;flex-direction:column}
-.chathead{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.chathead h2{margin:0 0 6px}
-.messages{flex:1;min-height:300px;max-height:430px;overflow:auto;padding:12px 0}
-.bubble{background:#f0edf9;border-radius:12px;padding:10px 13px;margin:9px 0;max-width:85%;width:fit-content;overflow-wrap:anywhere;white-space:pre-wrap}
-.mine{background:#7658df;color:white;margin-left:auto}
-.time{font-size:11px;opacity:.65;margin-top:5px}
-.sendrow{display:flex;gap:8px}
-.sendrow input{flex:1;min-width:0}
-.sendrow button{background:#7658df;color:white}
-.chat-actions{display:flex;gap:8px;margin-top:12px}
-.chat-actions button{flex:1}
-.menu-wrap{position:relative}
-.menu-button{width:34px;height:34px;padding:0;border-radius:50%;background:#f0edf9;color:#7658df;font-size:20px;font-weight:bold}
-.menu-dropdown{position:absolute;right:0;top:42px;background:white;min-width:145px;padding:7px;border-radius:10px;box-shadow:0 5px 20px #0002;z-index:10}
-.menu-dropdown button{width:100%;text-align:left;background:white;padding:11px}
-.menu-dropdown button:hover{background:#f5f3fb}
-.menu-dropdown .danger-text{color:#c33}
-.waiting{text-align:center;padding:35px 10px 25px}
-.waiting-icon{font-size:42px;color:#7658df;margin-bottom:12px}
-.waiting h2{font-size:22px}
-.waiting p{line-height:1.7}
-.waiting-actions{display:flex;gap:9px;margin-top:20px}
-.waiting-actions button{flex:1}
-footer{text-align:center;color:#aaa;padding:30px;font-size:12px}
-@media(max-width:700px){
- main{margin:22px auto}
- .card{padding:19px}
- .chat{min-height:470px}
- .messages{min-height:270px}
- .waiting-actions{flex-direction:column}
+.full{width:100%;margin-top:22px}
+.status{text-align:center;padding:22px 8px;color:#666;line-height:1.7}
+.spinner{width:30px;height:30px;border:3px solid #e5e2ff;border-top-color:#6658df;border-radius:50%;margin:0 auto 16px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.actions{display:flex;gap:10px;margin-top:18px}
+.actions button{flex:1}
+#chatPage{display:none}
+.chatHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.partner{font-weight:bold;font-size:18px}
+.menuWrap{position:relative}
+.menuButton{width:38px;height:38px;padding:0;border-radius:50%;background:#f0eff7;font-weight:bold;font-size:20px}
+.menu{display:none;position:absolute;right:0;top:44px;background:white;border:1px solid #eee;border-radius:10px;box-shadow:0 5px 20px #0002;min-width:125px;z-index:5;overflow:hidden}
+.menu button{display:block;width:100%;text-align:left;border-radius:0;background:white;padding:12px}
+.menu button:hover{background:#f5f4fa}
+#messages{height:390px;overflow-y:auto;background:#f7f7fa;border-radius:12px;padding:15px}
+.message{max-width:80%;margin:9px 0;padding:11px 13px;border-radius:13px;background:#fff;word-break:break-word;white-space:pre-wrap}
+.message.mine{margin-left:auto;background:#e9e6ff}
+.messageTime{font-size:11px;color:#999;margin-top:5px}
+.messageForm{display:flex;gap:8px;margin-top:12px}
+.messageForm input{flex:1;min-width:0}
+.messageForm button{background:#6658df;color:white}
+#endedPanel{display:none;margin-top:14px;padding:16px;background:#f4f2ff;border-radius:12px;text-align:center}
+#endedPanel p{margin:0 0 10px;color:#555}
+#chatActions{display:flex;gap:10px;margin-top:16px}
+#chatActions button{flex:1}
+footer{text-align:center;color:#aaa;font-size:12px;padding:30px}
+.small{font-size:13px;color:#999}
+@media(max-width:500px){
+ main{margin:18px auto}
+ .panel{padding:19px}
+ #messages{height:55vh}
+ .actions{flex-direction:column}
 }
 </style>
 </head>
 <body>
-
 <header>✦ 匿名聊聊</header>
 
 <main>
+  <!-- 第一頁：設定與配對等待 -->
+  <section id="setupPage">
+    <div class="panel" id="settingsPanel">
+      <h2>開始匿名聊天</h2>
 
-<!-- 第一頁：配對設定及配對等待 -->
-<section id="setupPage">
-
-  <div id="settingsPanel">
-    <h1>遇見一個陌生人</h1>
-    <p class="muted">不用真實姓名，從一段聊天開始認識彼此。</p>
-
-    <div class="card">
-      <h2>配對設定</h2>
-
-      <label>匿名暱稱</label>
+      <label for="nickname">你的暱稱</label>
       <input id="nickname" maxlength="20" placeholder="輸入暱稱">
 
       <label>你的性別</label>
-      <div class="options" id="gender">
-        <button data-value="male">男生</button>
-        <button data-value="female">女生</button>
-        <button data-value="other">其他</button>
-      </div>
+      <select id="gender">
+        <option value="">請選擇</option>
+        <option value="male">男</option>
+        <option value="female">女</option>
+        <option value="other">其他</option>
+      </select>
 
       <label>想認識的對象</label>
-      <div class="options" id="seeking">
-        <button data-value="male">男生</button>
-        <button data-value="female">女生</button>
-        <button class="active" data-value="any">不限</button>
-      </div>
+      <select id="seeking">
+        <option value="any">不限</option>
+        <option value="male">男</option>
+        <option value="female">女</option>
+      </select>
 
-      <button class="primary" id="start" disabled>正在連接...</button>
-      <div class="status" id="status">正在初始化匿名登入...</div>
+      <button class="primary full" id="startButton">開始配對</button>
+      <p class="small" style="text-align:center">配對成功後即可開始匿名聊天</p>
     </div>
-  </div>
 
-  <div id="waitingPanel" class="hidden">
-    <div class="card">
-      <div class="waiting">
-        <div class="waiting-icon" id="waitingIcon">⌕</div>
-        <h2 id="waitingTitle">正在尋找聊天對象</h2>
-        <p class="muted" id="waitingDescription">
-          正在為你尋找符合條件的真人使用者，請稍候。
-        </p>
+    <div class="panel" id="waitingPanel" style="display:none">
+      <h2 style="text-align:center">正在尋找聊天對象</h2>
+      <div class="status">
+        <div class="spinner"></div>
+        正在為你尋找合適的聊天對象，請稍候……
       </div>
-
-      <div class="status" id="waitingStatus">
-        配對進行中，找到對象後會自動進入聊天室。
-      </div>
-
-      <div class="waiting-actions">
+      <div class="actions">
         <button class="secondary" id="previousButton">上一頁</button>
         <button class="danger" id="cancelButton">取消配對</button>
       </div>
     </div>
-  </div>
+  </section>
 
-</section>
-
-<!-- 第二頁：聊天 -->
-<section id="chatPage" class="hidden">
-  <div class="card chat">
-
-    <div class="chathead">
-      <div>
-        <h2 id="roomTitle">匿名聊天室</h2>
-        <div class="muted" id="partnerInfo">尚未配對</div>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="muted" id="roomState">等待中</span>
-
-        <div class="menu-wrap">
-          <button class="menu-button" id="menuButton" title="更多選項">!</button>
-          <div class="menu-dropdown hidden" id="menuDropdown">
-            <button id="report">⚑ 檢舉對方</button>
-            <button id="block" class="danger-text">⊘ 封鎖對方</button>
+  <!-- 第二頁：聊天室 -->
+  <section id="chatPage">
+    <div class="panel">
+      <div class="chatHeader">
+        <div>
+          <div class="partner" id="partnerName">匿名對象</div>
+          <div class="small" id="partnerGender"></div>
+        </div>
+        <div class="menuWrap">
+          <button class="menuButton" id="menuButton" title="檢舉或封鎖">！</button>
+          <div class="menu" id="menu">
+            <button id="reportButton">檢舉對方</button>
+            <button id="blockButton">封鎖對方</button>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="messages" id="messages">
-      <p class="muted" style="text-align:center;margin-top:100px">
-        配對成功後，就能在這裡聊天。
-      </p>
-    </div>
+      <div id="messages"></div>
 
-    <div id="sendArea" class="hidden">
-      <div class="sendrow">
-        <input id="messageInput" maxlength="2000" placeholder="輸入訊息...">
-        <button id="send">傳送</button>
+      <form class="messageForm" id="messageForm">
+        <input id="messageInput" maxlength="2000" placeholder="輸入訊息……" autocomplete="off">
+        <button type="submit" id="sendButton">傳送</button>
+      </form>
+
+      <!-- 對方離開後顯示 -->
+      <div id="endedPanel">
+        <p>對方已離開聊天室</p>
+        <div class="small">你可以保留聊天紀錄，或離開聊天室重新開始。</div>
+        <div class="actions">
+          <button class="secondary" id="endedLeaveButton">離開聊天室</button>
+          <button class="primary" id="endedFindButton">重新尋找</button>
+        </div>
+      </div>
+
+      <!-- 正常聊天室的操作 -->
+      <div id="chatActions">
+        <button class="secondary" id="leaveButton">離開聊天室</button>
+        <button class="primary" id="findAgainButton">重新尋找</button>
       </div>
     </div>
-
-    <div class="chat-actions">
-      <button class="secondary hidden" id="refreshMessages">重新載入訊息</button>
-      <button class="danger hidden" id="leave">離開聊天室</button>
-      <button class="primary hidden" id="findAgain">重新尋找聊天對象</button>
-    </div>
-
-    <div class="status" id="chatStatus">聊天室狀態</div>
-  </div>
-</section>
-
+  </section>
 </main>
 
-<footer>匿名聊聊 · 讓每一次相遇，都從聊天開始</footer>
+<footer>匿名聊聊 · 讓每一次相遇都從聊天開始</footer>
 
 <script>
 const SUPABASE_URL = "https://rxeolvxuvhysvgwvnkmu.supabase.co";
 const SUPABASE_KEY = "sb_publishable_JC0K_2qN8_GMv9qXFjxohQ_WGWwlPTM";
-
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let user = null;
-let gender = "";
-let seeking = "any";
 let roomId = null;
 let partnerId = null;
 let partnerNickname = "";
@@ -193,654 +160,468 @@ let messageChannel = null;
 let roomChannel = null;
 let displayedMessageIds = new Set();
 let matchRunId = 0;
+let queueMayExist = false;
+let roomEnded = false;
 
 const $ = id => document.getElementById(id);
 
-function setStatus(text) {
-  $("status").textContent = text;
+function setStatus(message) {
+  console.log(message);
 }
 
-function setWaitingStatus(text) {
-  $("waitingStatus").textContent = text;
+function showSetup() {
+  $("setupPage").style.display = "block";
+  $("settingsPanel").style.display = "block";
+  $("waitingPanel").style.display = "none";
+  $("chatPage").style.display = "none";
 }
 
-function setChatStatus(text) {
-  $("chatStatus").textContent = text;
+function showWaiting() {
+  $("setupPage").style.display = "block";
+  $("settingsPanel").style.display = "none";
+  $("waitingPanel").style.display = "block";
+  $("chatPage").style.display = "none";
 }
 
-function showSetupState(state) {
-  $("setupPage").classList.remove("hidden");
-  $("chatPage").classList.add("hidden");
-
-  $("settingsPanel").classList.toggle("hidden", state !== "settings");
-  $("waitingPanel").classList.toggle("hidden", state !== "waiting");
+function showChat() {
+  $("setupPage").style.display = "none";
+  $("chatPage").style.display = "block";
 }
 
-function showChatPage() {
-  $("setupPage").classList.add("hidden");
-  $("chatPage").classList.remove("hidden");
-}
-
-function choose(container, callback) {
-  $(container).querySelectorAll("button").forEach(button => {
-    button.onclick = () => {
-      $(container).querySelectorAll("button").forEach(b => b.classList.remove("active"));
-      button.classList.add("active");
-      callback(button.dataset.value);
-    };
-  });
-}
-
-choose("gender", value => gender = value);
-choose("seeking", value => seeking = value);
-
-function setChatMode(active) {
-  $("sendArea").classList.toggle("hidden", !active);
-  $("leave").classList.toggle("hidden", !active);
-  $("refreshMessages").classList.toggle("hidden", !active);
-  $("findAgain").classList.toggle("hidden", active);
+function clearTimers() {
+  if (pollTimer) clearTimeout(pollTimer);
+  if (roomStatusTimer) clearInterval(roomStatusTimer);
+  pollTimer = null;
+  roomStatusTimer = null;
 }
 
 function removeRoomSubscriptions() {
-  if (messageChannel) {
-    db.removeChannel(messageChannel);
-    messageChannel = null;
-  }
-
-  if (roomChannel) {
-    db.removeChannel(roomChannel);
-    roomChannel = null;
-  }
-
-  if (roomStatusTimer) {
-    clearInterval(roomStatusTimer);
-    roomStatusTimer = null;
-  }
+  if (messageChannel) db.removeChannel(messageChannel);
+  if (roomChannel) db.removeChannel(roomChannel);
+  messageChannel = null;
+  roomChannel = null;
 }
 
 function resetChat() {
+  clearTimers();
   removeRoomSubscriptions();
-
   roomId = null;
   partnerId = null;
   partnerNickname = "";
+  roomEnded = false;
   displayedMessageIds.clear();
-
-  $("roomTitle").textContent = "匿名聊天室";
-  $("partnerInfo").textContent = "尚未配對";
-  $("roomState").textContent = "等待中";
-  $("messages").innerHTML =
-    '<p class="muted" style="text-align:center;margin-top:100px">準備尋找下一位聊天對象。</p>';
-
-  $("menuDropdown").classList.add("hidden");
-  setChatMode(false);
+  $("messages").innerHTML = "";
+  $("endedPanel").style.display = "none";
+  $("chatActions").style.display = "flex";
+  $("messageForm").style.display = "flex";
+  $("menu").style.display = "none";
 }
 
 async function initialize() {
   try {
-    const {data, error} = await db.auth.getSession();
-    if (error) throw error;
+    const { data: sessionData } = await db.auth.getSession();
 
-    if (data.session) {
-      user = data.session.user;
+    if (sessionData.session) {
+      user = sessionData.session.user;
     } else {
-      const result = await db.auth.signInAnonymously();
-      if (result.error) throw result.error;
-      user = result.data.user;
+      const { data, error } = await db.auth.signInAnonymously();
+      if (error) throw error;
+      user = data.user;
     }
 
-    $("start").disabled = false;
-    $("start").textContent = "開始尋找聊天對象";
-    setStatus("匿名登入成功，可以開始配對。");
-
     await restoreRoom();
-
-  } catch (e) {
-    console.error(e);
-    setStatus("初始化失敗：" + e.message);
-    $("start").disabled = true;
+  } catch (error) {
+    alert("登入失敗：" + error.message);
   }
 }
 
 async function saveProfile() {
   const nickname = $("nickname").value.trim();
+  const gender = $("gender").value;
+  const seeking = $("seeking").value;
 
-  if (!nickname) throw new Error("請輸入暱稱");
-  if (!gender) throw new Error("請選擇自己的性別");
+  if (!nickname) {
+    alert("請輸入暱稱");
+    return false;
+  }
 
-  const {error} = await db.from("profiles").upsert({
+  if (!gender) {
+    alert("請選擇你的性別");
+    return false;
+  }
+
+  const { error } = await db.from("profiles").upsert({
     id: user.id,
     nickname,
     gender,
     seeking
-  }, {onConflict:"id"});
+  });
 
-  if (error) throw error;
+  if (error) {
+    alert("儲存資料失敗：" + error.message);
+    return false;
+  }
+
+  return true;
 }
 
-async function getPartner() {
-  const {data, error} = await db.rpc("get_match_nickname");
+async function getPartner(id) {
+  const { data, error } = await db.rpc("get_match_nickname", {
+    p_room_id: id
+  });
+
   if (error) throw error;
 
-  if (data.status !== "matched") {
-    throw new Error("找不到聊天室對象資料，請重新整理後再試。");
+  if (!data || data.status !== "matched") {
+    throw new Error("無法取得配對對象資料");
   }
 
   roomId = data.room_id;
   partnerId = data.partner_id;
   partnerNickname = data.nickname || "匿名使用者";
 
-  $("roomTitle").textContent = "正在與 " + partnerNickname + " 聊天";
+  $("partnerName").textContent = partnerNickname;
+  $("partnerGender").textContent =
+    data.gender === "male" ? "男" :
+    data.gender === "female" ? "女" : "其他";
 
-  const genderText = {
-    male:"男生",
-    female:"女生",
-    other:"其他"
-  };
-
-  $("partnerInfo").textContent =
-    "對方性別：" + (genderText[data.gender] || "未提供");
+  return data;
 }
 
-function renderMessage(id, text, mine, createdAt) {
-  if (displayedMessageIds.has(String(id))) return;
-  displayedMessageIds.add(String(id));
+function renderMessage(message) {
+  if (displayedMessageIds.has(message.id)) return;
+  displayedMessageIds.add(message.id);
 
-  const area = $("messages");
-  const div = document.createElement("div");
-  div.className = "bubble" + (mine ? " mine" : "");
+  const item = document.createElement("div");
+  item.className = "message" + (message.sender_id === user.id ? " mine" : "");
 
   const content = document.createElement("div");
-  content.textContent = text;
+  content.textContent = message.content;
 
   const time = document.createElement("div");
-  time.className = "time";
-  time.textContent = createdAt
-    ? new Date(createdAt).toLocaleString()
-    : "";
+  time.className = "messageTime";
+  time.textContent = new Date(message.created_at).toLocaleTimeString("zh-TW", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
-  div.append(content, time);
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
+  item.appendChild(content);
+  item.appendChild(time);
+  $("messages").appendChild(item);
+  $("messages").scrollTop = $("messages").scrollHeight;
 }
 
 async function loadMessages() {
   if (!roomId) return;
 
-  const {data, error} = await db
+  const { data, error } = await db
     .from("messages")
-    .select("id,sender_id,content,created_at")
+    .select("*")
     .eq("room_id", roomId)
-    .order("created_at", {ascending:true});
+    .order("created_at", { ascending: true });
 
-  if (error) throw error;
-
-  $("messages").innerHTML = "";
-  displayedMessageIds.clear();
-
-  if (!data.length) {
-    $("messages").innerHTML =
-      '<p class="muted" style="text-align:center">聊天室已建立，傳送第一則訊息吧！</p>';
+  if (error) {
+    console.error("讀取訊息失敗", error);
     return;
   }
 
-  data.forEach(m => {
-    renderMessage(
-      m.id,
-      m.content,
-      m.sender_id === user.id,
-      m.created_at
-    );
-  });
+  (data || []).forEach(renderMessage);
 }
 
 function subscribeMessages() {
-  if (messageChannel) {
-    db.removeChannel(messageChannel);
-  }
-
-  messageChannel = db.channel("room-messages-" + roomId)
-    .on("postgres_changes", {
-      event:"INSERT",
-      schema:"public",
-      table:"messages",
-      filter:"room_id=eq." + roomId
-    }, payload => {
-      const m = payload.new;
-      renderMessage(
-        m.id,
-        m.content,
-        m.sender_id === user.id,
-        m.created_at
-      );
-    })
-    .subscribe(status => {
-      if (status === "CHANNEL_ERROR") {
-        setChatStatus("即時訊息連線發生問題，請重新載入訊息。");
-      }
-    });
-}
-
-/* 對方離開時保留已載入的聊天訊息 */
-function handlePartnerLeft() {
   if (!roomId) return;
 
+  messageChannel = db
+    .channel("messages-" + roomId)
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "messages",
+      filter: "room_id=eq." + roomId
+    }, payload => {
+      renderMessage(payload.new);
+    })
+    .subscribe();
+}
+
+function showPartnerLeft() {
+  if (roomEnded) return;
+
+  roomEnded = true;
+  clearTimers();
   removeRoomSubscriptions();
 
-  roomId = null;
-  partnerId = null;
-  partnerNickname = "";
+  $("endedPanel").style.display = "block";
+  $("chatActions").style.display = "none";
+  $("messageForm").style.display = "none";
+  $("menu").style.display = "none";
 
-  $("roomTitle").textContent = "匿名聊天室";
-  $("roomState").textContent = "聊天室已結束";
-  $("partnerInfo").textContent = "對方已離開聊天室";
-
-  setChatMode(false);
-  $("findAgain").disabled = false;
-  $("findAgain").textContent = "重新尋找聊天對象";
-
-  const notice = document.createElement("p");
-  notice.className = "muted";
-  notice.style.textAlign = "center";
-  notice.style.padding = "12px";
-  notice.textContent = "對方已離開聊天室。你可以重新尋找聊天對象。";
-
-  $("messages").appendChild(notice);
-  $("messages").scrollTop = $("messages").scrollHeight;
-
-  setChatStatus("對方已離開，原本的聊天紀錄仍然保留。");
+  setStatus("對方已離開聊天室");
 }
 
 async function checkRoomStatus() {
-  if (!roomId) return;
+  if (!roomId || roomEnded) return;
 
   try {
-    const {data, error} = await db.rpc("get_current_room");
+    const { data, error } = await db.rpc("get_current_room");
+
     if (error) throw error;
 
-    if (
-      data.status !== "matched" ||
-      data.room_id !== roomId
-    ) {
-      handlePartnerLeft();
+    if (!data || data.status !== "matched" || data.room_id !== roomId) {
+      showPartnerLeft();
     }
-  } catch (e) {
-    console.error("檢查聊天室狀態失敗：", e);
+  } catch (error) {
+    console.error("檢查聊天室狀態失敗", error);
   }
 }
 
 function subscribeRoomStatus() {
-  if (roomChannel) {
-    db.removeChannel(roomChannel);
-    roomChannel = null;
-  }
+  if (!roomId) return;
 
-  roomChannel = db.channel("room-status-" + roomId)
+  roomChannel = db
+    .channel("room-status-" + roomId)
     .on("postgres_changes", {
-      event:"UPDATE",
-      schema:"public",
-      table:"rooms",
-      filter:"id=eq." + roomId
+      event: "UPDATE",
+      schema: "public",
+      table: "rooms",
+      filter: "id=eq." + roomId
     }, payload => {
       if (payload.new.status === "closed") {
-        handlePartnerLeft();
+        showPartnerLeft();
       }
     })
-    .subscribe(status => {
-      if (status === "CHANNEL_ERROR") {
-        console.warn("聊天室即時狀態訂閱失敗，將使用定時檢查。");
-      }
-    });
+    .subscribe();
 
-  if (roomStatusTimer) clearInterval(roomStatusTimer);
   roomStatusTimer = setInterval(checkRoomStatus, 3000);
 }
 
-async function openRoom() {
-  await getPartner();
+async function openRoom(id) {
+  resetChat();
 
-  showChatPage();
-  $("roomState").textContent = "已配對";
-  setChatMode(true);
-
-  $("findAgain").disabled = false;
-
-  await loadMessages();
-  subscribeMessages();
-  subscribeRoomStatus();
-
-  setChatStatus("聊天室已連線，可以開始聊天。");
-}
-
-async function restoreRoom() {
   try {
-    const {data, error} = await db.rpc("get_current_room");
-    if (error) throw error;
+    await getPartner(id);
+    roomEnded = false;
+    showChat();
 
-    if (data.status === "matched") {
-      roomId = data.room_id;
-      await openRoom();
-      return;
-    }
-
-    showSetupState("settings");
-    $("start").disabled = false;
-    $("start").textContent = "開始尋找聊天對象";
-    setStatus("目前沒有進行中的聊天室，可以開始配對。");
-
-  } catch (e) {
-    console.error(e);
-    setStatus("檢查聊天室失敗：" + e.message);
-    $("start").disabled = false;
-    $("start").textContent = "重新嘗試";
+    await loadMessages();
+    subscribeMessages();
+    subscribeRoomStatus();
+  } catch (error) {
+    alert("開啟聊天室失敗：" + error.message);
+    showSetup();
   }
 }
 
-/* 真人配對輪詢 */
+async function restoreRoom() {
+  const { data, error } = await db.rpc("get_current_room");
+
+  if (error) {
+    console.error(error);
+    showSetup();
+    return;
+  }
+
+  if (data && data.status === "matched") {
+    await openRoom(data.room_id);
+  } else {
+    showSetup();
+  }
+}
+
 async function findMatch(runId) {
   if (!searching || runId !== matchRunId) return;
 
   try {
-    const {data, error} = await db.rpc("find_match");
+    const { data, error } = await db.rpc("find_match");
     if (error) throw error;
 
-    // 若使用者已取消，忽略舊的配對回應
-    if (!searching || runId !== matchRunId) return;
+    if (runId !== matchRunId || !searching) return;
 
     if (data.status === "matched") {
       searching = false;
-
-      if (pollTimer) {
-        clearTimeout(pollTimer);
-        pollTimer = null;
-      }
-
-      await openRoom();
+      queueMayExist = false;
+      clearTimers();
+      await openRoom(data.room_id);
       return;
     }
 
     if (data.status === "waiting") {
-      setWaitingStatus("正在尋找符合條件的真人使用者...");
       pollTimer = setTimeout(() => findMatch(runId), 3000);
       return;
     }
 
-    throw new Error("配對狀態：" + data.status);
-
-  } catch (e) {
-    console.error(e);
-
-    if (!searching || runId !== matchRunId) return;
-
+    throw new Error("配對狀態異常");
+  } catch (error) {
+    if (runId !== matchRunId) return;
     searching = false;
-    setWaitingStatus("配對失敗：" + e.message);
-    $("waitingTitle").textContent = "配對發生問題";
-    $("waitingIcon").textContent = "!";
-    $("cancelButton").classList.add("hidden");
-    $("previousButton").textContent = "返回設定";
+    clearTimers();
+    alert("配對發生問題：" + error.message);
+    showSetup();
   }
 }
 
-/* 開始配對 */
 async function beginMatching(fromSetup) {
   if (searching) return;
 
-  try {
-    await saveProfile();
-
-    if (pollTimer) {
-      clearTimeout(pollTimer);
-      pollTimer = null;
-    }
-
-    resetChat();
-
-    searching = true;
-    matchRunId++;
-    const thisRunId = matchRunId;
-
-    showSetupState("waiting");
-
-    $("waitingTitle").textContent = "正在尋找聊天對象";
-    $("waitingIcon").textContent = "⌕";
-    $("waitingDescription").textContent =
-      "正在為你尋找符合條件的真人使用者，請稍候。";
-
-    $("cancelButton").classList.remove("hidden");
-    $("previousButton").textContent = "上一頁";
-    $("cancelButton").disabled = false;
-    $("previousButton").disabled = false;
-
-    setWaitingStatus("配對進行中，找到對象後會自動進入聊天室。");
-
-    await findMatch(thisRunId);
-
-  } catch (e) {
-    searching = false;
-    $("start").disabled = false;
-    setStatus(e.message);
-    showSetupState("settings");
+  if (fromSetup) {
+    const saved = await saveProfile();
+    if (!saved) return;
   }
+
+  resetChat();
+  searching = true;
+  queueMayExist = true;
+  const runId = ++matchRunId;
+
+  showWaiting();
+  findMatch(runId);
 }
 
-$("start").onclick = () => beginMatching(true);
-
-/* 取消配對：真正從資料庫佇列移除 */
 async function stopMatching(destination) {
-  if (!searching) {
-    if (destination === "settings") {
-      showSetupState("settings");
-    }
-    return;
-  }
-
-  // 先阻止舊的輪詢回應改變畫面
   searching = false;
   matchRunId++;
+  clearTimers();
 
-  if (pollTimer) {
-    clearTimeout(pollTimer);
-    pollTimer = null;
+  if (!queueMayExist) {
+    if (destination === "settings") showSetup();
+    return;
   }
 
-  $("cancelButton").disabled = true;
-  $("previousButton").disabled = true;
-
-  setWaitingStatus("正在取消配對...");
-
   try {
-    const {data, error} = await db.rpc("cancel_match");
+    const { data, error } = await db.rpc("cancel_match");
     if (error) throw error;
 
-    // 取消期間如果剛好配對成功，就進入聊天室
-    if (data.status === "matched") {
-      $("cancelButton").disabled = false;
-      $("previousButton").disabled = false;
-      await openRoom();
+    if (data && data.status === "matched") {
+      queueMayExist = false;
+      await openRoom(data.room_id);
       return;
     }
 
-    if (data.status !== "cancelled") {
-      throw new Error("取消狀態：" + data.status);
-    }
+    queueMayExist = false;
 
     if (destination === "settings") {
-      showSetupState("settings");
-      setStatus("已取消配對，可以修改設定或重新開始。");
-      $("start").disabled = false;
-      $("start").textContent = "開始尋找聊天對象";
+      showSetup();
+    } else {
+      showWaiting();
+      $("waitingPanel").querySelector(".status").innerHTML =
+        "已取消配對。你可以返回設定或再次開始配對。";
+    }
+  } catch (error) {
+    alert("取消配對失敗，請再試一次：" + error.message);
+    // 保留 queueMayExist，讓使用者可以再次按取消
+    showWaiting();
+  }
+}
+
+async function sendMessage(event) {
+  event.preventDefault();
+
+  if (!roomId || roomEnded) return;
+
+  const content = $("messageInput").value.trim();
+  if (!content) return;
+
+  $("sendButton").disabled = true;
+
+  const { error } = await db.from("messages").insert({
+    room_id: roomId,
+    sender_id: user.id,
+    content
+  });
+
+  $("sendButton").disabled = false;
+
+  if (error) {
+    alert("訊息傳送失敗：" + error.message);
+    return;
+  }
+
+  $("messageInput").value = "";
+}
+
+async function leaveRoom() {
+  if (!roomEnded) {
+    const { error } = await db.rpc("leave_room");
+
+    if (error) {
+      alert("離開聊天室失敗：" + error.message);
       return;
     }
-
-    $("waitingTitle").textContent = "已取消配對";
-    $("waitingIcon").textContent = "✓";
-    $("waitingDescription").textContent =
-      "目前已停止搜尋，你可以返回設定頁重新開始。";
-
-    setWaitingStatus("已成功從配對佇列移除，不會繼續尋找對象。");
-
-    $("cancelButton").classList.add("hidden");
-    $("previousButton").disabled = false;
-    $("previousButton").textContent = "返回設定";
-
-  } catch (e) {
-    console.error(e);
-
-    $("cancelButton").disabled = false;
-    $("previousButton").disabled = false;
-
-    setWaitingStatus("取消配對失敗：" + e.message +
-      "。請再按一次取消，或重新整理頁面。");
   }
+
+  resetChat();
+  showSetup();
 }
 
-$("cancelButton").onclick = () => stopMatching("stay");
-$("previousButton").onclick = () => stopMatching("settings");
-
-/* 送出訊息 */
-async function sendMessage() {
-  const content = $("messageInput").value.trim();
-
-  if (!content || !roomId) return;
-
-  $("send").disabled = true;
-
-  try {
-    const {error} = await db.from("messages").insert({
-      room_id:roomId,
-      sender_id:user.id,
-      content
-    });
-
-    if (error) throw error;
-
-    $("messageInput").value = "";
-
-  } catch (e) {
-    alert("訊息傳送失敗：" + e.message);
-  } finally {
-    $("send").disabled = false;
-  }
+async function findAgain() {
+  resetChat();
+  await beginMatching(false);
 }
 
-$("send").onclick = sendMessage;
+async function blockPartner() {
+  if (!partnerId) return;
 
-$("messageInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessage();
-  }
-});
+  if (!confirm("確定要封鎖這位使用者嗎？")) return;
 
-$("refreshMessages").onclick = async () => {
-  try {
-    await loadMessages();
-    setChatStatus("訊息已重新載入。");
-  } catch (e) {
-    setChatStatus("讀取訊息失敗：" + e.message);
-  }
-};
+  const { error } = await db.from("blocks").insert({
+    blocker_id: user.id,
+    blocked_id: partnerId
+  });
 
-/* 離開聊天室 */
-$("leave").onclick = async () => {
-  if (!confirm("確定要離開聊天室嗎？雙方的聊天室都會結束，但聊天紀錄會保留。")) {
+  if (error) {
+    alert("封鎖失敗：" + error.message);
     return;
   }
 
-  try {
-    const {data, error} = await db.rpc("leave_room");
-    if (error) throw error;
+  alert("已封鎖對方");
+  $("menu").style.display = "none";
+  await leaveRoom();
+}
 
-    if (data.status !== "closed" && data.status !== "not_found") {
-      throw new Error("無法結束聊天室：" + data.status);
-    }
+async function reportPartner() {
+  if (!partnerId || !roomId) return;
 
-    resetChat();
-    showChatPage();
-
-    $("roomState").textContent = "已離開";
-    $("partnerInfo").textContent = "你已離開上一個聊天室";
-    $("findAgain").disabled = false;
-    $("findAgain").textContent = "重新尋找聊天對象";
-
-    setChatStatus("已離開聊天室，聊天紀錄仍保留。");
-
-  } catch (e) {
-    alert("離開失敗：" + e.message);
-  }
-};
-
-$("findAgain").onclick = () => beginMatching(false);
-
-/* 右上角驚嘆號選單 */
-$("menuButton").onclick = e => {
-  e.stopPropagation();
-  $("menuDropdown").classList.toggle("hidden");
-};
-
-$("menuDropdown").onclick = e => {
-  e.stopPropagation();
-};
-
-document.addEventListener("click", () => {
-  $("menuDropdown").classList.add("hidden");
-});
-
-/* 封鎖 */
-$("block").onclick = async () => {
-  $("menuDropdown").classList.add("hidden");
-
-  if (!partnerId) {
-    alert("目前無法取得對方資料。");
-    return;
-  }
-
-  if (!confirm("確定封鎖這位使用者嗎？")) return;
-
-  try {
-    const {error} = await db.from("blocks").insert({
-      blocker_id:user.id,
-      blocked_id:partnerId
-    });
-
-    if (error) throw error;
-
-    alert("已建立封鎖紀錄。建議接著離開聊天室。");
-
-  } catch (e) {
-    alert("封鎖失敗：" + e.message);
-  }
-};
-
-/* 檢舉 */
-$("report").onclick = async () => {
-  $("menuDropdown").classList.add("hidden");
-
-  if (!partnerId || !roomId) {
-    alert("目前無法取得對方資料。");
-    return;
-  }
-
-  const reason = prompt("請輸入檢舉原因：");
+  const reason = prompt("請簡單描述檢舉原因：");
   if (!reason || !reason.trim()) return;
 
-  try {
-    const {error} = await db.from("reports").insert({
-      reporter_id:user.id,
-      reported_user_id:partnerId,
-      room_id:roomId,
-      reason:reason.trim(),
-      details:""
-    });
+  const { error } = await db.from("reports").insert({
+    reporter_id: user.id,
+    reported_user_id: partnerId,
+    room_id: roomId,
+    reason: reason.trim()
+  });
 
-    if (error) throw error;
-
-    alert("檢舉紀錄已送出。");
-
-  } catch (e) {
-    alert("檢舉失敗：" + e.message);
+  if (error) {
+    alert("檢舉失敗：" + error.message);
+    return;
   }
-};
+
+  alert("檢舉已送出，謝謝你的回報。");
+  $("menu").style.display = "none";
+}
+
+// 按鈕事件
+$("startButton").addEventListener("click", () => beginMatching(true));
+
+$("previousButton").addEventListener("click", () => stopMatching("settings"));
+$("cancelButton").addEventListener("click", () => stopMatching("stay"));
+
+$("messageForm").addEventListener("submit", sendMessage);
+
+$("leaveButton").addEventListener("click", leaveRoom);
+$("findAgainButton").addEventListener("click", findAgain);
+
+// 對方離開後的兩個按鈕
+$("endedLeaveButton").addEventListener("click", leaveRoom);
+$("endedFindButton").addEventListener("click", findAgain);
+
+$("menuButton").addEventListener("click", () => {
+  $("menu").style.display =
+    $("menu").style.display === "block" ? "none" : "block";
+});
+
+$("blockButton").addEventListener("click", blockPartner);
+$("reportButton").addEventListener("click", reportPartner);
 
 initialize();
 </script>
