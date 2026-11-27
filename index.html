@@ -31,7 +31,7 @@ footer{text-align:center;color:#aaa;padding:28px;font-size:12px}@media(max-width
   <div id="waitingPanel" class="hidden">
     <h2 style="text-align:center">正在尋找聊天對象</h2>
     <div class="status"><div class="spinner"></div><span id="waitingText">正在為你尋找合適的聊天對象，請稍候…</span></div>
-    <div class="actions"><button class="secondary" id="previousButton">上一頁</button><button class="danger" id="cancelButton">取消配對</button></div>
+    <div class="actions"><button class="danger" id="cancelButton">取消配對</button></div>
   </div>
 </section>
 <section id="chatPage" class="card hidden">
@@ -71,12 +71,12 @@ async function openRoom(){resetChat();await getPartner();showChat();await loadMe
 async function restoreRoom(){const {data,error}=await db.rpc("get_current_room");if(error)throw error;if(data&&data.status==="matched")await openRoom();else showSetup()}
 async function findMatch(run){if(!searching||run!==matchRunId)return;try{const {data,error}=await db.rpc("find_match");if(error)throw error;if(run!==matchRunId||!searching)return;if(data.status==="matched"){searching=false;queueMayExist=false;clearTimers();await openRoom();return}if(data.status==="waiting"){pollTimer=setTimeout(()=>findMatch(run),3000);return}throw new Error("配對狀態："+data.status)}catch(e){if(run!==matchRunId)return;searching=false;clearTimers();alert("配對發生問題："+e.message);showSetup()}}
 async function beginMatching(fromSetup){if(searching)return;if(fromSetup){try{await saveProfile()}catch(e){alert(e.message);return}}resetChat();searching=true;queueMayExist=true;const run=++matchRunId;showWaiting();findMatch(run)}
-async function stopMatching(destination){searching=false;matchRunId++;clearTimers();if(!queueMayExist){if(destination==="settings")showSetup();return}try{const {data,error}=await db.rpc("cancel_match");if(error)throw error;if(data?.status==="matched"){queueMayExist=false;await openRoom();return}queueMayExist=false;if(destination==="settings")showSetup();else{$("waitingText").textContent="已取消配對，可以返回設定重新開始。";showWaiting()}}catch(e){alert("取消配對失敗："+e.message+"。請再按一次取消。");showWaiting()}}
+async function stopMatching(){searching=false;matchRunId++;clearTimers();if(!queueMayExist){showSetup();return}try{const {data,error}=await db.rpc("cancel_match");if(error)throw error;if(data?.status==="matched"){queueMayExist=false;await openRoom();return}queueMayExist=false;showSetup()}catch(e){alert("取消配對失敗："+e.message+"。請再按一次取消。");showWaiting()}}
 async function sendMessage(){if(roomEnded||!roomId)return;const content=$("messageInput").value.trim();if(!content)return;$("sendButton").disabled=true;const {error}=await db.from("messages").insert({room_id:roomId,sender_id:user.id,content});$("sendButton").disabled=false;if(error){alert("訊息傳送失敗："+error.message);return}$("messageInput").value=""}
 async function leaveRoom(){if(!roomEnded){const {error}=await db.rpc("leave_room");if(error){alert("離開聊天室失敗："+error.message);return}}resetChat();showSetup()}
 async function blockPartner(){if(!partnerId)return;if(!confirm("確定封鎖這位對象？"))return;const {error}=await db.from("blocks").insert({blocker_id:user.id,blocked_id:partnerId});if(error){alert("封鎖失敗："+error.message);return}alert("已封鎖");await leaveRoom()}
 async function reportPartner(){if(!partnerId||!roomId)return;const reason=prompt("請輸入檢舉原因：");if(!reason?.trim())return;const {error}=await db.from("reports").insert({reporter_id:user.id,reported_user_id:partnerId,room_id:roomId,reason:reason.trim(),details:""});if(error){alert("檢舉失敗："+error.message);return}alert("檢舉已送出")}
-$("startButton").onclick=()=>beginMatching(true);$("previousButton").onclick=()=>stopMatching("settings");$("cancelButton").onclick=()=>stopMatching("stay");$("sendButton").onclick=sendMessage;$("messageInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendMessage()}});$("leaveButton").onclick=leaveRoom;$("endedLeaveButton").onclick=leaveRoom;$("menuButton").onclick=()=>{$("menu").style.display=$("menu").style.display==="block"?"none":"block"};$("blockButton").onclick=blockPartner;$("reportButton").onclick=reportPartner;
+$("startButton").onclick=()=>beginMatching(true);$("cancelButton").onclick=stopMatching;$("sendButton").onclick=sendMessage;$("messageInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendMessage()}});$("leaveButton").onclick=leaveRoom;$("endedLeaveButton").onclick=leaveRoom;$("menuButton").onclick=()=>{$("menu").style.display=$("menu").style.display==="block"?"none":"block"};$("blockButton").onclick=blockPartner;$("reportButton").onclick=reportPartner;
 initialize();
 </script>
 </body>
