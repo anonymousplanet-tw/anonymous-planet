@@ -3,45 +3,57 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>匿名星球</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f5f3fb;color:#29263b;font-family:Arial,"Microsoft JhengHei",sans-serif}
-header{background:white;padding:20px 7%;font-size:22px;font-weight:bold;color:#7658df;box-shadow:0 2px 10px #00000008}
-main{max-width:950px;margin:45px auto;padding:0 18px}
-h1{font-size:30px;margin-bottom:8px}
-.sub{color:#888;margin-bottom:30px}
-.layout{display:grid;grid-template-columns:330px 1fr;gap:20px}
-.card{background:white;border-radius:18px;padding:25px;box-shadow:0 5px 25px #00000008}
-h2{font-size:18px;margin-top:0}
-label{display:block;font-size:14px;font-weight:bold;margin:20px 0 8px}
-input{width:100%;padding:13px;border:1px solid #ddd;border-radius:9px;font-size:15px}
-.options{display:flex;gap:8px}
-.options button{flex:1;padding:11px 5px;border:1px solid #ddd;background:white;border-radius:9px}
-.options button.active{border-color:#7658df;color:#7658df;background:#f2efff}
-.primary{width:100%;padding:14px;border:0;border-radius:10px;background:#7658df;color:white;font-size:16px;font-weight:bold;margin-top:25px;cursor:pointer}
-.primary:disabled{opacity:.5;cursor:not-allowed}
-.status{margin-top:20px;padding:15px;background:#f5f3fb;border-radius:10px;color:#666;line-height:1.7}
-.chat{min-height:400px;display:flex;flex-direction:column}
-.chatbody{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:#888;line-height:2}
+header{background:#fff;padding:18px 7%;font-size:22px;font-weight:bold;color:#7658df;box-shadow:0 2px 10px #00000008}
+main{max-width:1000px;margin:35px auto;padding:0 16px}
+h1{font-size:28px}
+.muted{color:#888}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:18px}
+.card{background:white;border-radius:16px;padding:22px;box-shadow:0 5px 25px #00000008}
+label{display:block;font-weight:bold;font-size:14px;margin:17px 0 7px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font-size:15px}
+button{cursor:pointer;border:0;border-radius:9px;padding:12px}
+.primary{width:100%;background:#7658df;color:white;font-weight:bold;margin-top:20px}
+.secondary{background:#eee;color:#444}
+.danger{background:#fff0f0;color:#c33}
+button:disabled{opacity:.5;cursor:not-allowed}
+.options{display:flex;gap:7px}
+.options button{flex:1;background:#f4f4f4}
+.options button.active{background:#eee8ff;color:#7658df;outline:1px solid #7658df}
+.status{background:#f5f3fb;padding:13px;border-radius:9px;margin-top:16px;font-size:14px;line-height:1.6}
+.chat{min-height:520px;display:flex;flex-direction:column}
+.chathead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.chathead h2{font-size:18px}
+.messages{flex:1;min-height:300px;max-height:430px;overflow:auto;padding:12px 0}
+.bubble{background:#f0edf9;border-radius:12px;padding:10px 13px;margin:9px 0;max-width:85%;width:fit-content;overflow-wrap:anywhere}
+.mine{background:#7658df;color:white;margin-left:auto}
+.time{font-size:11px;opacity:.65;margin-top:5px}
+.sendrow{display:flex;gap:8px}
+.sendrow input{flex:1;min-width:0}
+.sendrow button{background:#7658df;color:white}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.actions button{font-size:12px}
+.hidden{display:none}
 footer{text-align:center;color:#aaa;padding:30px;font-size:12px}
-@media(max-width:700px){.layout{grid-template-columns:1fr}main{margin:25px auto}header{padding:18px}}
+@media(max-width:700px){main{margin:22px auto}.layout{grid-template-columns:1fr}.chat{min-height:470px}}
 </style>
 </head>
 <body>
 <header>✦ 匿名星球</header>
 <main>
 <h1>遇見一個陌生人</h1>
-<p class="sub">不用真實姓名，從一段聊天開始認識彼此。</p>
+<p class="muted">不用真實姓名，從一段聊天開始認識彼此。</p>
 
 <div class="layout">
 <section class="card">
-<h2>你的配對條件</h2>
-
+<h2>配對設定</h2>
 <label>匿名暱稱</label>
-<input id="nickname" maxlength="20" placeholder="輸入你的暱稱">
+<input id="nickname" maxlength="20" placeholder="輸入暱稱">
 
 <label>你的性別</label>
 <div class="options" id="gender">
@@ -58,193 +70,307 @@ footer{text-align:center;color:#aaa;padding:30px;font-size:12px}
 </div>
 
 <button class="primary" id="start" disabled>正在連接...</button>
-
-<div class="status" id="status">
-正在初始化匿名登入...
-</div>
+<div class="status" id="status">正在初始化匿名登入...</div>
 </section>
 
 <section class="card chat">
-<h2 id="roomTitle">聊天室</h2>
-<div class="chatbody" id="chat">
-<div>
-<div style="font-size:48px">💬</div>
-<strong>你的下一段故事，從這裡開始</strong>
-<div>設定條件，尋找聊天夥伴。</div>
+<div class="chathead">
+<h2 id="roomTitle">匿名聊天室</h2>
+<span class="muted" id="roomState">尚未配對</span>
+</div>
+
+<div class="messages" id="messages">
+<p class="muted" style="text-align:center;margin-top:100px">配對成功後，就能在這裡聊天。</p>
+</div>
+
+<div id="sendArea" class="hidden">
+<div class="sendrow">
+<input id="messageInput" maxlength="2000" placeholder="輸入訊息...">
+<button id="send">傳送</button>
+</div>
+<div class="actions">
+<button class="secondary" id="refreshMessages">重新載入訊息</button>
+<button class="danger" id="block">封鎖對方</button>
+<button class="danger" id="report">檢舉對方</button>
 </div>
 </div>
 </section>
 </div>
 </main>
-
 <footer>匿名星球 · 讓每一次相遇，都從聊天開始</footer>
 
 <script>
 const SUPABASE_URL = "https://rxeolvxuvhysvgwvnkmu.supabase.co";
 const SUPABASE_KEY = "sb_publishable_JC0K_2qN8_GMv9qXFjxohQ_WGWwlPTM";
 
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let user = null;
-let gender = "";
-let seeking = "any";
-let searching = false;
-let timer = null;
+let user=null;
+let gender="";
+let seeking="any";
+let roomId=null;
+let partnerId=null;
+let searching=false;
+let pollTimer=null;
+let messageChannel=null;
 
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
-function choose(container, callback) {
-  $(container).querySelectorAll("button").forEach(button => {
-    button.onclick = () => {
-      $(container).querySelectorAll("button").forEach(b => b.classList.remove("active"));
+function setStatus(text){$("status").textContent=text}
+
+function choose(container,callback){
+  $(container).querySelectorAll("button").forEach(button=>{
+    button.onclick=()=>{
+      $(container).querySelectorAll("button").forEach(b=>b.classList.remove("active"));
       button.classList.add("active");
       callback(button.dataset.value);
     };
   });
 }
 
-choose("gender", value => gender = value);
-choose("seeking", value => seeking = value);
+choose("gender",v=>gender=v);
+choose("seeking",v=>seeking=v);
 
-function message(title, detail) {
-  $("chat").innerHTML = "";
+async function initialize(){
+  try{
+    const {data,error}=await db.auth.getSession();
+    if(error)throw error;
 
-  const div = document.createElement("div");
-  div.style.textAlign = "center";
-  div.style.margin = "auto";
-
-  const strong = document.createElement("strong");
-  strong.textContent = title;
-
-  const p = document.createElement("p");
-  p.textContent = detail;
-
-  div.append(strong, p);
-  $("chat").appendChild(div);
-}
-
-async function initialize() {
-  try {
-    const {data, error} = await db.auth.getSession();
-    if (error) throw error;
-
-    if (data.session) {
-      user = data.session.user;
-    } else {
-      const result = await db.auth.signInAnonymously();
-      if (result.error) throw result.error;
-      user = result.data.user;
+    if(data.session){
+      user=data.session.user;
+    }else{
+      const result=await db.auth.signInAnonymously();
+      if(result.error)throw result.error;
+      user=result.data.user;
     }
 
-    $("status").textContent = "匿名登入成功，可以開始配對。";
-    $("start").disabled = false;
-    $("start").textContent = "開始尋找聊天對象";
+    $("start").disabled=false;
+    $("start").textContent="開始尋找聊天對象";
+    setStatus("匿名登入成功，可以開始配對。");
+  }catch(e){
+    console.error(e);
+    setStatus("登入失敗："+e.message);
+  }
+}
 
-  } catch (error) {
+async function saveProfile(){
+  const nickname=$("nickname").value.trim();
+  if(!nickname)throw new Error("請輸入暱稱");
+  if(!gender)throw new Error("請選擇自己的性別");
+
+  const {error}=await db.from("profiles").upsert({
+    id:user.id,
+    nickname,
+    gender,
+    seeking
+  },{onConflict:"id"});
+
+  if(error)throw error;
+}
+
+async function getPartner(){
+  const {data,error}=await db.rpc("get_match_nickname");
+  if(error)throw error;
+
+  if(data.status==="matched"){
+    $("roomTitle").textContent="正在與 "+data.nickname+" 聊天";
+  }else{
+    $("roomTitle").textContent="匿名聊天室";
+  }
+}
+
+function showMessage(text,mine,createdAt){
+  const area=$("messages");
+  const div=document.createElement("div");
+  div.className="bubble"+(mine?" mine":"");
+
+  const content=document.createElement("div");
+  content.textContent=text;
+
+  const time=document.createElement("div");
+  time.className="time";
+  time.textContent=createdAt?new Date(createdAt).toLocaleString():"";
+
+  div.append(content,time);
+  area.appendChild(div);
+  area.scrollTop=area.scrollHeight;
+}
+
+async function loadMessages(){
+  if(!roomId)return;
+
+  const {data,error}=await db
+    .from("messages")
+    .select("id,sender_id,content,created_at")
+    .eq("room_id",roomId)
+    .order("created_at",{ascending:true});
+
+  if(error){
     console.error(error);
-    $("status").textContent = "連線失敗：" + error.message;
+    setStatus("讀取訊息失敗："+error.message);
+    return;
+  }
+
+  $("messages").innerHTML="";
+
+  if(!data.length){
+    $("messages").innerHTML='<p class="muted" style="text-align:center">聊天室已建立，傳送第一則訊息吧！</p>';
+    return;
+  }
+
+  data.forEach(m=>showMessage(m.content,m.sender_id===user.id,m.created_at));
+}
+
+function subscribeMessages(){
+  if(messageChannel){
+    db.removeChannel(messageChannel);
+  }
+
+  messageChannel=db.channel("room-"+roomId)
+    .on("postgres_changes",{
+      event:"INSERT",
+      schema:"public",
+      table:"messages",
+      filter:"room_id=eq."+roomId
+    },payload=>{
+      const m=payload.new;
+      showMessage(m.content,m.sender_id===user.id,m.created_at);
+    })
+    .subscribe();
+}
+
+async function sendMessage(){
+  const content=$("messageInput").value.trim();
+  if(!content||!roomId)return;
+
+  $("send").disabled=true;
+
+  try{
+    const {error}=await db.from("messages").insert({
+      room_id:roomId,
+      sender_id:user.id,
+      content
+    });
+
+    if(error)throw error;
+
+    $("messageInput").value="";
+  }catch(e){
+    alert("訊息傳送失敗："+e.message);
+  }finally{
+    $("send").disabled=false;
   }
 }
 
-async function saveProfile() {
-  const nickname = $("nickname").value.trim();
+async function startChat(){
+  searching=true;
+  $("sendArea").classList.remove("hidden");
+  $("roomState").textContent="已配對";
+  $("start").textContent="配對成功";
+  $("start").disabled=true;
 
-  if (!nickname) throw new Error("請輸入暱稱");
-  if (!gender) throw new Error("請選擇你的性別");
+  await getPartner();
+  await loadMessages();
+  subscribeMessages();
 
-  const {error} = await db.from("profiles").upsert({
-    id: user.id,
-    nickname: nickname,
-    gender: gender,
-    seeking: seeking
-  }, {onConflict:"id"});
-
-  if (error) throw error;
+  setStatus("🎉 真人配對成功！可以開始聊天了。");
 }
 
-async function showMatchedNickname() {
-  const {data, error} = await db.rpc("get_match_nickname");
+async function findMatch(){
+  if(!searching)return;
 
-  if (error) throw error;
+  try{
+    const {data,error}=await db.rpc("find_match");
+    if(error)throw error;
 
-  if (data.status === "matched" && data.nickname) {
-    $("roomTitle").textContent = "正在與 " + data.nickname + " 聊天";
-    message(
-      "🎉 真人配對成功！",
-      "你配對到的對象是：" + data.nickname + "。聊天訊息功能接下來開發。"
-    );
-  } else {
-    $("roomTitle").textContent = "配對成功！";
-    message(
-      "🎉 真人配對成功！",
-      "聊天室已建立，但暫時無法讀取對方暱稱。"
-    );
-  }
-}
-
-async function findMatch() {
-  if (!searching) return;
-
-  try {
-    const {data, error} = await db.rpc("find_match");
-    if (error) throw error;
-
-    if (data.status === "matched") {
-      searching = false;
-      clearTimeout(timer);
-
-      $("start").disabled = false;
-      $("start").textContent = "重新配對";
-      $("status").textContent = "已找到聊天對象。";
-
-      await showMatchedNickname();
+    if(data.status==="matched"){
+      clearTimeout(pollTimer);
+      roomId=data.room_id;
+      searching=false;
+      await startChat();
       return;
     }
 
-    if (data.status === "waiting") {
-      $("status").textContent = "正在尋找符合條件的真人使用者...";
-      message("正在尋找聊天對象", "請稍候，配對成功後會通知你。");
-      timer = setTimeout(findMatch, 3000);
+    if(data.status==="waiting"){
+      setStatus("正在尋找符合條件的真人使用者...");
+      pollTimer=setTimeout(findMatch,3000);
       return;
     }
 
-    throw new Error("配對狀態：" + data.status);
-
-  } catch (error) {
-    console.error(error);
-    searching = false;
-
-    $("start").disabled = false;
-    $("start").textContent = "重新開始";
-    $("status").textContent = "配對失敗：" + error.message;
+    throw new Error("未知配對狀態："+data.status);
+  }catch(e){
+    console.error(e);
+    searching=false;
+    $("start").disabled=false;
+    $("start").textContent="重新開始";
+    setStatus("配對失敗："+e.message);
   }
 }
 
-$("start").onclick = async () => {
-  if (searching) return;
+$("start").onclick=async()=>{
+  $("start").disabled=true;
 
-  $("start").disabled = true;
-  $("start").textContent = "正在保存資料...";
-
-  try {
+  try{
     await saveProfile();
-
-    searching = true;
-    $("start").textContent = "配對中...";
-    $("status").textContent = "正在連接真人配對服務...";
-
+    searching=true;
+    $("start").textContent="配對中...";
+    setStatus("正在尋找聊天對象，請稍候...");
+    $("messages").innerHTML='<p class="muted" style="text-align:center;margin-top:100px">正在尋找聊天對象...</p>';
     await findMatch();
+  }catch(e){
+    searching=false;
+    $("start").disabled=false;
+    $("start").textContent="開始尋找聊天對象";
+    setStatus(e.message);
+  }
+};
 
-  } catch (error) {
-    console.error(error);
+$("send").onclick=sendMessage;
+$("messageInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter")sendMessage();
+});
+$("refreshMessages").onclick=loadMessages;
 
-    searching = false;
-    $("start").disabled = false;
-    $("start").textContent = "開始尋找聊天對象";
-    $("status").textContent = error.message;
+$("block").onclick=async()=>{
+  if(!partnerId){
+    alert("目前尚未取得對方使用者資料，暫時無法封鎖。");
+    return;
+  }
+  if(!confirm("確定要封鎖這位使用者？"))return;
+
+  const {error}=await db.from("blocks").insert({
+    blocker_id:user.id,
+    blocked_id:partnerId
+  });
+
+  if(error){
+    alert("封鎖失敗："+error.message);
+  }else{
+    alert("已送出封鎖紀錄。");
+  }
+};
+
+$("report").onclick=async()=>{
+  if(!partnerId){
+    alert("目前尚未取得對方使用者資料，暫時無法檢舉。");
+    return;
+  }
+
+  const reason=prompt("請輸入檢舉原因：");
+  if(!reason)return;
+
+  const {error}=await db.from("reports").insert({
+    reporter_id:user.id,
+    reported_user_id:partnerId,
+    room_id:roomId,
+    reason:reason,
+    details:""
+  });
+
+  if(error){
+    alert("檢舉失敗："+error.message);
+  }else{
+    alert("檢舉紀錄已送出。");
   }
 };
 
