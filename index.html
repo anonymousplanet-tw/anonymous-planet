@@ -1,628 +1,75 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>匿名聊聊</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#f4f5f8;color:#25283a;font-family:Arial,"Noto Sans TC",sans-serif}
-header{background:#fff;padding:18px 22px;border-bottom:1px solid #e8e8ee;font-size:21px;font-weight:bold}
-main{max-width:680px;margin:35px auto;padding:0 16px}
-.panel{background:#fff;border:1px solid #e8e8ee;border-radius:16px;padding:25px;box-shadow:0 5px 20px #20204008}
-h2{margin:0 0 20px;font-size:21px}
-label{display:block;margin:18px 0 8px;font-weight:bold;font-size:14px}
-input,select,textarea{width:100%;padding:13px;border:1px solid #dddde5;border-radius:9px;font-size:16px;background:#fff}
-button{border:0;border-radius:9px;padding:13px 18px;font-size:15px;cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}
-.primary{background:#6658df;color:white}
-.secondary{background:#eeeef5;color:#333}
-.danger{background:#fff0f0;color:#c33}
-.full{width:100%;margin-top:22px}
-.status{text-align:center;padding:22px 8px;color:#666;line-height:1.7}
-.spinner{width:30px;height:30px;border:3px solid #e5e2ff;border-top-color:#6658df;border-radius:50%;margin:0 auto 16px;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.actions{display:flex;gap:10px;margin-top:18px}
-.actions button{flex:1}
-#chatPage{display:none}
-.chatHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
-.partner{font-weight:bold;font-size:18px}
-.menuWrap{position:relative}
-.menuButton{width:38px;height:38px;padding:0;border-radius:50%;background:#f0eff7;font-weight:bold;font-size:20px}
-.menu{display:none;position:absolute;right:0;top:44px;background:white;border:1px solid #eee;border-radius:10px;box-shadow:0 5px 20px #0002;min-width:125px;z-index:5;overflow:hidden}
-.menu button{display:block;width:100%;text-align:left;border-radius:0;background:white;padding:12px}
-.menu button:hover{background:#f5f4fa}
-#messages{height:390px;overflow-y:auto;background:#f7f7fa;border-radius:12px;padding:15px}
-.message{max-width:80%;margin:9px 0;padding:11px 13px;border-radius:13px;background:#fff;word-break:break-word;white-space:pre-wrap}
-.message.mine{margin-left:auto;background:#e9e6ff}
-.messageTime{font-size:11px;color:#999;margin-top:5px}
-.messageForm{display:flex;gap:8px;margin-top:12px}
-.messageForm input{flex:1;min-width:0}
-.messageForm button{background:#6658df;color:white}
-#endedPanel{display:none;margin-top:14px;padding:16px;background:#f4f2ff;border-radius:12px;text-align:center}
-#endedPanel p{margin:0 0 10px;color:#555}
-#chatActions{display:flex;gap:10px;margin-top:16px}
-#chatActions button{flex:1}
-footer{text-align:center;color:#aaa;font-size:12px;padding:30px}
-.small{font-size:13px;color:#999}
-@media(max-width:500px){
- main{margin:18px auto}
- .panel{padding:19px}
- #messages{height:55vh}
- .actions{flex-direction:column}
-}
+*{box-sizing:border-box}body{margin:0;background:#f5f3fb;color:#29263b;font-family:Arial,"Microsoft JhengHei",sans-serif}header{background:#fff;padding:18px 7%;font-size:22px;font-weight:bold;color:#7658df;box-shadow:0 2px 10px #00000008}main{max-width:680px;margin:32px auto;padding:0 16px}.card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 5px 25px #00000008}h1{font-size:24px;margin:0 0 8px}h2{font-size:20px;margin:0 0 20px}.muted{color:#888;font-size:14px;line-height:1.7}label{display:block;font-weight:bold;font-size:14px;margin:20px 0 9px}input{width:100%;padding:13px;border:1px solid #ddd;border-radius:9px;font-size:16px}.options{display:flex;gap:9px}.options button{flex:1;background:#f4f2f9;color:#555;border:1px solid #e8e4f1;padding:13px 6px;font-size:15px}.options button.active{background:#eee8ff;color:#7658df;border:1px solid #7658df;font-weight:bold}.primary,.secondary,.danger{border:0;border-radius:9px;padding:13px 16px;font-size:15px;cursor:pointer}.primary{background:#7658df;color:#fff}.secondary{background:#eee;color:#444}.danger{background:#fff0f0;color:#c33}button:disabled{opacity:.5;cursor:not-allowed}.full{width:100%;margin-top:22px}.hidden{display:none!important}.status{text-align:center;background:#f5f3fb;padding:22px 14px;border-radius:10px;margin-top:18px;line-height:1.8;color:#666}.spinner{width:28px;height:28px;border:3px solid #e5ddff;border-top-color:#7658df;border-radius:50%;margin:0 auto 12px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.actions{display:flex;gap:10px;margin-top:16px}.actions button{flex:1}.chathead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.chathead h2{margin:0 0 4px}.menuWrap{position:relative}.menuButton{width:38px;height:38px;border-radius:50%;background:#f0edf9;color:#7658df;font-weight:bold;font-size:19px}.menu{display:none;position:absolute;right:0;top:44px;z-index:5;background:white;border:1px solid #eee;border-radius:10px;box-shadow:0 5px 20px #0002;min-width:130px;overflow:hidden}.menu button{display:block;width:100%;border:0;background:white;text-align:left;padding:12px}.menu button:hover{background:#f5f3fb}.messages{height:390px;overflow:auto;background:#f8f7fb;border-radius:12px;padding:12px}.bubble{background:#eeeaf7;border-radius:12px;padding:10px 13px;margin:9px 0;max-width:85%;width:fit-content;overflow-wrap:anywhere;white-space:pre-wrap}.mine{background:#7658df;color:white;margin-left:auto}.time{font-size:11px;opacity:.65;margin-top:5px}.sendrow{display:flex;gap:8px;margin-top:12px}.sendrow input{flex:1;min-width:0}.sendrow button{background:#7658df;color:white}.ended{margin-top:14px;padding:16px;background:#f5f3fb;border-radius:12px;text-align:center}.ended p{margin:0 0 6px;font-weight:bold}.small{font-size:12px;color:#999}footer{text-align:center;color:#aaa;padding:28px;font-size:12px}@media(max-width:500px){main{margin:18px auto}.card{padding:19px}.messages{height:55vh}.options{gap:6px}.options button{padding:12px 4px;font-size:14px}}
 </style>
 </head>
 <body>
 <header>✦ 匿名聊聊</header>
-
 <main>
-  <!-- 第一頁：設定與配對等待 -->
-  <section id="setupPage">
-    <div class="panel" id="settingsPanel">
-      <h2>開始匿名聊天</h2>
-
-      <label for="nickname">你的暱稱</label>
-      <input id="nickname" maxlength="20" placeholder="輸入暱稱">
-
-      <label>你的性別</label>
-      <select id="gender">
-        <option value="">請選擇</option>
-        <option value="male">男</option>
-        <option value="female">女</option>
-        <option value="other">其他</option>
-      </select>
-
-      <label>想認識的對象</label>
-      <select id="seeking">
-        <option value="any">不限</option>
-        <option value="male">男</option>
-        <option value="female">女</option>
-      </select>
-
-      <button class="primary full" id="startButton">開始配對</button>
-      <p class="small" style="text-align:center">配對成功後即可開始匿名聊天</p>
-    </div>
-
-    <div class="panel" id="waitingPanel" style="display:none">
-      <h2 style="text-align:center">正在尋找聊天對象</h2>
-      <div class="status">
-        <div class="spinner"></div>
-        正在為你尋找合適的聊天對象，請稍候……
-      </div>
-      <div class="actions">
-        <button class="secondary" id="previousButton">上一頁</button>
-        <button class="danger" id="cancelButton">取消配對</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- 第二頁：聊天室 -->
-  <section id="chatPage">
-    <div class="panel">
-      <div class="chatHeader">
-        <div>
-          <div class="partner" id="partnerName">匿名對象</div>
-          <div class="small" id="partnerGender"></div>
-        </div>
-        <div class="menuWrap">
-          <button class="menuButton" id="menuButton" title="檢舉或封鎖">！</button>
-          <div class="menu" id="menu">
-            <button id="reportButton">檢舉對方</button>
-            <button id="blockButton">封鎖對方</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="messages"></div>
-
-      <form class="messageForm" id="messageForm">
-        <input id="messageInput" maxlength="2000" placeholder="輸入訊息……" autocomplete="off">
-        <button type="submit" id="sendButton">傳送</button>
-      </form>
-
-      <!-- 對方離開後顯示 -->
-      <div id="endedPanel">
-        <p>對方已離開聊天室</p>
-        <div class="small">你可以保留聊天紀錄，或離開聊天室重新開始。</div>
-        <div class="actions">
-          <button class="secondary" id="endedLeaveButton">離開聊天室</button>
-          <button class="primary" id="endedFindButton">重新尋找</button>
-        </div>
-      </div>
-
-      <!-- 正常聊天室的操作 -->
-      <div id="chatActions">
-        <button class="secondary" id="leaveButton">離開聊天室</button>
-        <button class="primary" id="findAgainButton">重新尋找</button>
-      </div>
-    </div>
-  </section>
+<section id="setupPage" class="card">
+  <div id="settingsPanel">
+    <h1>開始聊天</h1><p class="muted">選擇聊天偏好，開始一段新的對話。</p>
+    <label for="nickname">暱稱</label><input id="nickname" maxlength="20" placeholder="輸入暱稱">
+    <label>你的性別</label><div class="options" id="gender"><button type="button" data-value="male">男生</button><button type="button" data-value="female">女生</button><button type="button" data-value="other">其他</button></div>
+    <label>想認識的對象</label><div class="options" id="seeking"><button type="button" data-value="male">男生</button><button type="button" data-value="female">女生</button><button type="button" class="active" data-value="any">不限</button></div>
+    <button class="primary full" id="startButton" disabled>正在連線…</button>
+  </div>
+  <div id="waitingPanel" class="hidden">
+    <h2 style="text-align:center">正在尋找聊天對象</h2>
+    <div class="status"><div class="spinner"></div><span id="waitingText">正在為你尋找合適的聊天對象，請稍候…</span></div>
+    <div class="actions"><button class="secondary" id="previousButton">上一頁</button><button class="danger" id="cancelButton">取消配對</button></div>
+  </div>
+</section>
+<section id="chatPage" class="card hidden">
+  <div class="chathead"><div><h2 id="partnerName">匿名聊天室</h2><div class="muted" id="partnerInfo">已配對</div></div><div class="menuWrap"><button class="menuButton" id="menuButton" aria-label="更多選項">！</button><div class="menu" id="menu"><button id="reportButton">檢舉</button><button id="blockButton">封鎖</button></div></div></div>
+  <div class="messages" id="messages"></div>
+  <div id="sendArea"><div class="sendrow"><input id="messageInput" maxlength="2000" placeholder="輸入訊息…"><button id="sendButton">傳送</button></div></div>
+  <div id="endedPanel" class="ended hidden"><p>對方已離開聊天室</p><div class="muted">聊天紀錄仍保留，你可以離開或重新尋找。</div><div class="actions"><button class="secondary" id="endedLeaveButton">離開聊天室</button><button class="primary" id="endedFindButton">重新尋找</button></div></div>
+  <div id="chatActions" class="actions"><button class="secondary" id="leaveButton">離開聊天室</button><button class="primary" id="findAgainButton">重新尋找</button></div>
+</section>
 </main>
-
-<footer>匿名聊聊 · 讓每一次相遇都從聊天開始</footer>
-
+<footer>匿名聊聊 · 從一段對話開始</footer>
 <script>
-const SUPABASE_URL = "https://rxeolvxuvhysvgwvnkmu.supabase.co";
-const SUPABASE_KEY = "sb_publishable_JC0K_2qN8_GMv9qXFjxohQ_WGWwlPTM";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let user = null;
-let roomId = null;
-let partnerId = null;
-let partnerNickname = "";
-let searching = false;
-let pollTimer = null;
-let roomStatusTimer = null;
-let messageChannel = null;
-let roomChannel = null;
-let displayedMessageIds = new Set();
-let matchRunId = 0;
-let queueMayExist = false;
-let roomEnded = false;
-
-const $ = id => document.getElementById(id);
-
-function setStatus(message) {
-  console.log(message);
-}
-
-function showSetup() {
-  $("setupPage").style.display = "block";
-  $("settingsPanel").style.display = "block";
-  $("waitingPanel").style.display = "none";
-  $("chatPage").style.display = "none";
-}
-
-function showWaiting() {
-  $("setupPage").style.display = "block";
-  $("settingsPanel").style.display = "none";
-  $("waitingPanel").style.display = "block";
-  $("chatPage").style.display = "none";
-}
-
-function showChat() {
-  $("setupPage").style.display = "none";
-  $("chatPage").style.display = "block";
-}
-
-function clearTimers() {
-  if (pollTimer) clearTimeout(pollTimer);
-  if (roomStatusTimer) clearInterval(roomStatusTimer);
-  pollTimer = null;
-  roomStatusTimer = null;
-}
-
-function removeRoomSubscriptions() {
-  if (messageChannel) db.removeChannel(messageChannel);
-  if (roomChannel) db.removeChannel(roomChannel);
-  messageChannel = null;
-  roomChannel = null;
-}
-
-function resetChat() {
-  clearTimers();
-  removeRoomSubscriptions();
-  roomId = null;
-  partnerId = null;
-  partnerNickname = "";
-  roomEnded = false;
-  displayedMessageIds.clear();
-  $("messages").innerHTML = "";
-  $("endedPanel").style.display = "none";
-  $("chatActions").style.display = "flex";
-  $("messageForm").style.display = "flex";
-  $("menu").style.display = "none";
-}
-
-async function initialize() {
-  try {
-    const { data: sessionData } = await db.auth.getSession();
-
-    if (sessionData.session) {
-      user = sessionData.session.user;
-    } else {
-      const { data, error } = await db.auth.signInAnonymously();
-      if (error) throw error;
-      user = data.user;
-    }
-
-    await restoreRoom();
-  } catch (error) {
-    alert("登入失敗：" + error.message);
-  }
-}
-
-async function saveProfile() {
-  const nickname = $("nickname").value.trim();
-  const gender = $("gender").value;
-  const seeking = $("seeking").value;
-
-  if (!nickname) {
-    alert("請輸入暱稱");
-    return false;
-  }
-
-  if (!gender) {
-    alert("請選擇你的性別");
-    return false;
-  }
-
-  const { error } = await db.from("profiles").upsert({
-    id: user.id,
-    nickname,
-    gender,
-    seeking
-  });
-
-  if (error) {
-    alert("儲存資料失敗：" + error.message);
-    return false;
-  }
-
-  return true;
-}
-
-async function getPartner(id) {
-  const { data, error } = await db.rpc("get_match_nickname", {
-    p_room_id: id
-  });
-
-  if (error) throw error;
-
-  if (!data || data.status !== "matched") {
-    throw new Error("無法取得配對對象資料");
-  }
-
-  roomId = data.room_id;
-  partnerId = data.partner_id;
-  partnerNickname = data.nickname || "匿名使用者";
-
-  $("partnerName").textContent = partnerNickname;
-  $("partnerGender").textContent =
-    data.gender === "male" ? "男" :
-    data.gender === "female" ? "女" : "其他";
-
-  return data;
-}
-
-function renderMessage(message) {
-  if (displayedMessageIds.has(message.id)) return;
-  displayedMessageIds.add(message.id);
-
-  const item = document.createElement("div");
-  item.className = "message" + (message.sender_id === user.id ? " mine" : "");
-
-  const content = document.createElement("div");
-  content.textContent = message.content;
-
-  const time = document.createElement("div");
-  time.className = "messageTime";
-  time.textContent = new Date(message.created_at).toLocaleTimeString("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  item.appendChild(content);
-  item.appendChild(time);
-  $("messages").appendChild(item);
-  $("messages").scrollTop = $("messages").scrollHeight;
-}
-
-async function loadMessages() {
-  if (!roomId) return;
-
-  const { data, error } = await db
-    .from("messages")
-    .select("*")
-    .eq("room_id", roomId)
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    console.error("讀取訊息失敗", error);
-    return;
-  }
-
-  (data || []).forEach(renderMessage);
-}
-
-function subscribeMessages() {
-  if (!roomId) return;
-
-  messageChannel = db
-    .channel("messages-" + roomId)
-    .on("postgres_changes", {
-      event: "INSERT",
-      schema: "public",
-      table: "messages",
-      filter: "room_id=eq." + roomId
-    }, payload => {
-      renderMessage(payload.new);
-    })
-    .subscribe();
-}
-
-function showPartnerLeft() {
-  if (roomEnded) return;
-
-  roomEnded = true;
-  clearTimers();
-  removeRoomSubscriptions();
-
-  $("endedPanel").style.display = "block";
-  $("chatActions").style.display = "none";
-  $("messageForm").style.display = "none";
-  $("menu").style.display = "none";
-
-  setStatus("對方已離開聊天室");
-}
-
-async function checkRoomStatus() {
-  if (!roomId || roomEnded) return;
-
-  try {
-    const { data, error } = await db.rpc("get_current_room");
-
-    if (error) throw error;
-
-    if (!data || data.status !== "matched" || data.room_id !== roomId) {
-      showPartnerLeft();
-    }
-  } catch (error) {
-    console.error("檢查聊天室狀態失敗", error);
-  }
-}
-
-function subscribeRoomStatus() {
-  if (!roomId) return;
-
-  roomChannel = db
-    .channel("room-status-" + roomId)
-    .on("postgres_changes", {
-      event: "UPDATE",
-      schema: "public",
-      table: "rooms",
-      filter: "id=eq." + roomId
-    }, payload => {
-      if (payload.new.status === "closed") {
-        showPartnerLeft();
-      }
-    })
-    .subscribe();
-
-  roomStatusTimer = setInterval(checkRoomStatus, 3000);
-}
-
-async function openRoom(id) {
-  resetChat();
-
-  try {
-    await getPartner(id);
-    roomEnded = false;
-    showChat();
-
-    await loadMessages();
-    subscribeMessages();
-    subscribeRoomStatus();
-  } catch (error) {
-    alert("開啟聊天室失敗：" + error.message);
-    showSetup();
-  }
-}
-
-async function restoreRoom() {
-  const { data, error } = await db.rpc("get_current_room");
-
-  if (error) {
-    console.error(error);
-    showSetup();
-    return;
-  }
-
-  if (data && data.status === "matched") {
-    await openRoom(data.room_id);
-  } else {
-    showSetup();
-  }
-}
-
-async function findMatch(runId) {
-  if (!searching || runId !== matchRunId) return;
-
-  try {
-    const { data, error } = await db.rpc("find_match");
-    if (error) throw error;
-
-    if (runId !== matchRunId || !searching) return;
-
-    if (data.status === "matched") {
-      searching = false;
-      queueMayExist = false;
-      clearTimers();
-      await openRoom(data.room_id);
-      return;
-    }
-
-    if (data.status === "waiting") {
-      pollTimer = setTimeout(() => findMatch(runId), 3000);
-      return;
-    }
-
-    throw new Error("配對狀態異常");
-  } catch (error) {
-    if (runId !== matchRunId) return;
-    searching = false;
-    clearTimers();
-    alert("配對發生問題：" + error.message);
-    showSetup();
-  }
-}
-
-async function beginMatching(fromSetup) {
-  if (searching) return;
-
-  if (fromSetup) {
-    const saved = await saveProfile();
-    if (!saved) return;
-  }
-
-  resetChat();
-  searching = true;
-  queueMayExist = true;
-  const runId = ++matchRunId;
-
-  showWaiting();
-  findMatch(runId);
-}
-
-async function stopMatching(destination) {
-  searching = false;
-  matchRunId++;
-  clearTimers();
-
-  if (!queueMayExist) {
-    if (destination === "settings") showSetup();
-    return;
-  }
-
-  try {
-    const { data, error } = await db.rpc("cancel_match");
-    if (error) throw error;
-
-    if (data && data.status === "matched") {
-      queueMayExist = false;
-      await openRoom(data.room_id);
-      return;
-    }
-
-    queueMayExist = false;
-
-    if (destination === "settings") {
-      showSetup();
-    } else {
-      showWaiting();
-      $("waitingPanel").querySelector(".status").innerHTML =
-        "已取消配對。你可以返回設定或再次開始配對。";
-    }
-  } catch (error) {
-    alert("取消配對失敗，請再試一次：" + error.message);
-    // 保留 queueMayExist，讓使用者可以再次按取消
-    showWaiting();
-  }
-}
-
-async function sendMessage(event) {
-  event.preventDefault();
-
-  if (!roomId || roomEnded) return;
-
-  const content = $("messageInput").value.trim();
-  if (!content) return;
-
-  $("sendButton").disabled = true;
-
-  const { error } = await db.from("messages").insert({
-    room_id: roomId,
-    sender_id: user.id,
-    content
-  });
-
-  $("sendButton").disabled = false;
-
-  if (error) {
-    alert("訊息傳送失敗：" + error.message);
-    return;
-  }
-
-  $("messageInput").value = "";
-}
-
-async function leaveRoom() {
-  if (!roomEnded) {
-    const { error } = await db.rpc("leave_room");
-
-    if (error) {
-      alert("離開聊天室失敗：" + error.message);
-      return;
-    }
-  }
-
-  resetChat();
-  showSetup();
-}
-
-async function findAgain() {
-  resetChat();
-  await beginMatching(false);
-}
-
-async function blockPartner() {
-  if (!partnerId) return;
-
-  if (!confirm("確定要封鎖這位使用者嗎？")) return;
-
-  const { error } = await db.from("blocks").insert({
-    blocker_id: user.id,
-    blocked_id: partnerId
-  });
-
-  if (error) {
-    alert("封鎖失敗：" + error.message);
-    return;
-  }
-
-  alert("已封鎖對方");
-  $("menu").style.display = "none";
-  await leaveRoom();
-}
-
-async function reportPartner() {
-  if (!partnerId || !roomId) return;
-
-  const reason = prompt("請簡單描述檢舉原因：");
-  if (!reason || !reason.trim()) return;
-
-  const { error } = await db.from("reports").insert({
-    reporter_id: user.id,
-    reported_user_id: partnerId,
-    room_id: roomId,
-    reason: reason.trim()
-  });
-
-  if (error) {
-    alert("檢舉失敗：" + error.message);
-    return;
-  }
-
-  alert("檢舉已送出，謝謝你的回報。");
-  $("menu").style.display = "none";
-}
-
-// 按鈕事件
-$("startButton").addEventListener("click", () => beginMatching(true));
-
-$("previousButton").addEventListener("click", () => stopMatching("settings"));
-$("cancelButton").addEventListener("click", () => stopMatching("stay"));
-
-$("messageForm").addEventListener("submit", sendMessage);
-
-$("leaveButton").addEventListener("click", leaveRoom);
-$("findAgainButton").addEventListener("click", findAgain);
-
-// 對方離開後的兩個按鈕
-$("endedLeaveButton").addEventListener("click", leaveRoom);
-$("endedFindButton").addEventListener("click", findAgain);
-
-$("menuButton").addEventListener("click", () => {
-  $("menu").style.display =
-    $("menu").style.display === "block" ? "none" : "block";
-});
-
-$("blockButton").addEventListener("click", blockPartner);
-$("reportButton").addEventListener("click", reportPartner);
-
+const SUPABASE_URL="https://rxeolvxuvhysvgwvnkmu.supabase.co";
+const SUPABASE_KEY="sb_publishable_JC0K_2qN8_GMv9qXFjxohQ_WGWwlPTM";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let user=null,gender="",seeking="any",roomId=null,partnerId=null,searching=false,queueMayExist=false,roomEnded=false,matchRunId=0,pollTimer=null,roomStatusTimer=null,messageChannel=null,roomChannel=null,displayedMessageIds=new Set();
+function choose(id,callback){$(id).querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{$(id).querySelectorAll("button").forEach(x=>x.classList.remove("active"));b.classList.add("active");callback(b.dataset.value)}))}
+choose("gender",v=>gender=v);choose("seeking",v=>seeking=v);
+function showSetup(){clearTimers();removeSubscriptions();$("setupPage").classList.remove("hidden");$("settingsPanel").classList.remove("hidden");$("waitingPanel").classList.add("hidden");$("chatPage").classList.add("hidden")}
+function showWaiting(){$("setupPage").classList.remove("hidden");$("settingsPanel").classList.add("hidden");$("waitingPanel").classList.remove("hidden");$("chatPage").classList.add("hidden")}
+function showChat(){$("setupPage").classList.add("hidden");$("chatPage").classList.remove("hidden")}
+function clearTimers(){if(pollTimer)clearTimeout(pollTimer);if(roomStatusTimer)clearInterval(roomStatusTimer);pollTimer=null;roomStatusTimer=null}
+function removeSubscriptions(){if(messageChannel)db.removeChannel(messageChannel);if(roomChannel)db.removeChannel(roomChannel);messageChannel=null;roomChannel=null}
+function resetChat(){clearTimers();removeSubscriptions();roomId=null;partnerId=null;roomEnded=false;displayedMessageIds.clear();$("messages").innerHTML="";$("endedPanel").classList.add("hidden");$("chatActions").classList.remove("hidden");$("sendArea").classList.remove("hidden");$("menu").style.display="none"}
+async function initialize(){try{const {data,error}=await db.auth.getSession();if(error)throw error;if(data.session)user=data.session.user;else{const r=await db.auth.signInAnonymously();if(r.error)throw r.error;user=r.data.user}$("startButton").disabled=false;$("startButton").textContent="開始配對";await restoreRoom()}catch(e){alert("連線初始化失敗："+e.message)}}
+async function saveProfile(){const nickname=$("nickname").value.trim();if(!nickname)throw new Error("請輸入暱稱");if(!gender)throw new Error("請選擇你的性別");const {error}=await db.from("profiles").upsert({id:user.id,nickname,gender,seeking},{onConflict:"id"});if(error)throw error}
+async function getPartner(){// 此 RPC 是無參數函式，勿傳入 room_id
+ const {data,error}=await db.rpc("get_match_nickname");if(error)throw error;if(!data||data.status!=="matched")throw new Error("目前無法取得聊天室資料："+(data?.status||"unknown"));roomId=data.room_id;partnerId=data.partner_id;$("partnerName").textContent=data.nickname||"匿名使用者";const g={male:"男生",female:"女生",other:"其他"};$("partnerInfo").textContent=g[data.gender]||""}
+function renderMessage(m){if(displayedMessageIds.has(String(m.id)))return;displayedMessageIds.add(String(m.id));const d=document.createElement("div");d.className="bubble"+(m.sender_id===user.id?" mine":"");const c=document.createElement("div");c.textContent=m.content;const t=document.createElement("div");t.className="time";t.textContent=new Date(m.created_at).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});d.append(c,t);$("messages").appendChild(d);$("messages").scrollTop=$("messages").scrollHeight}
+async function loadMessages(){const {data,error}=await db.from("messages").select("id,sender_id,content,created_at").eq("room_id",roomId).order("created_at",{ascending:true});if(error)throw error;$("messages").innerHTML="";displayedMessageIds.clear();(data||[]).forEach(renderMessage)}
+function subscribeMessages(){messageChannel=db.channel("messages-"+roomId).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"room_id=eq."+roomId},p=>renderMessage(p.new)).subscribe()}
+function partnerLeft(){if(roomEnded)return;roomEnded=true;clearTimers();removeSubscriptions();$("endedPanel").classList.remove("hidden");$("chatActions").classList.add("hidden");$("sendArea").classList.add("hidden");$("menu").style.display="none"}
+async function checkRoomStatus(){if(!roomId||roomEnded)return;try{const {data,error}=await db.rpc("get_current_room");if(error)throw error;if(!data||data.status!=="matched"||data.room_id!==roomId)partnerLeft()}catch(e){console.warn(e)}}
+function subscribeRoom(){roomChannel=db.channel("room-"+roomId).on("postgres_changes",{event:"UPDATE",schema:"public",table:"rooms",filter:"id=eq."+roomId},p=>{if(p.new.status==="closed")partnerLeft()}).subscribe();roomStatusTimer=setInterval(checkRoomStatus,3000)}
+async function openRoom(){resetChat();await getPartner();showChat();await loadMessages();subscribeMessages();subscribeRoom()}
+async function restoreRoom(){const {data,error}=await db.rpc("get_current_room");if(error)throw error;if(data&&data.status==="matched")await openRoom();else showSetup()}
+async function findMatch(run){if(!searching||run!==matchRunId)return;try{const {data,error}=await db.rpc("find_match");if(error)throw error;if(run!==matchRunId||!searching)return;if(data.status==="matched"){searching=false;queueMayExist=false;clearTimers();await openRoom();return}if(data.status==="waiting"){pollTimer=setTimeout(()=>findMatch(run),3000);return}throw new Error("配對狀態："+data.status)}catch(e){if(run!==matchRunId)return;searching=false;clearTimers();alert("配對發生問題："+e.message);showSetup()}}
+async function beginMatching(fromSetup){if(searching)return;if(fromSetup){try{await saveProfile()}catch(e){alert(e.message);return}}resetChat();searching=true;queueMayExist=true;const run=++matchRunId;showWaiting();findMatch(run)}
+async function stopMatching(destination){searching=false;matchRunId++;clearTimers();if(!queueMayExist){if(destination==="settings")showSetup();return}try{const {data,error}=await db.rpc("cancel_match");if(error)throw error;if(data?.status==="matched"){queueMayExist=false;await openRoom();return}queueMayExist=false;if(destination==="settings")showSetup();else{$("waitingText").textContent="已取消配對，可以返回設定重新開始。";showWaiting()}}catch(e){alert("取消配對失敗："+e.message+"。請再按一次取消。");showWaiting()}}
+async function sendMessage(){if(roomEnded||!roomId)return;const content=$("messageInput").value.trim();if(!content)return;$("sendButton").disabled=true;const {error}=await db.from("messages").insert({room_id:roomId,sender_id:user.id,content});$("sendButton").disabled=false;if(error){alert("訊息傳送失敗："+error.message);return}$("messageInput").value=""}
+async function leaveRoom(){if(!roomEnded){const {error}=await db.rpc("leave_room");if(error){alert("離開聊天室失敗："+error.message);return}}resetChat();showSetup()}
+async function findAgain(){resetChat();await beginMatching(false)}
+async function blockPartner(){if(!partnerId)return;if(!confirm("確定封鎖這位對象？"))return;const {error}=await db.from("blocks").insert({blocker_id:user.id,blocked_id:partnerId});if(error){alert("封鎖失敗："+error.message);return}alert("已封鎖");await leaveRoom()}
+async function reportPartner(){if(!partnerId||!roomId)return;const reason=prompt("請輸入檢舉原因：");if(!reason?.trim())return;const {error}=await db.from("reports").insert({reporter_id:user.id,reported_user_id:partnerId,room_id:roomId,reason:reason.trim(),details:""});if(error){alert("檢舉失敗："+error.message);return}alert("檢舉已送出")}
+$("startButton").onclick=()=>beginMatching(true);$("previousButton").onclick=()=>stopMatching("settings");$("cancelButton").onclick=()=>stopMatching("stay");$("sendButton").onclick=sendMessage;$("messageInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendMessage()}});$("leaveButton").onclick=leaveRoom;$("findAgainButton").onclick=findAgain;$("endedLeaveButton").onclick=leaveRoom;$("endedFindButton").onclick=findAgain;$("menuButton").onclick=()=>{$("menu").style.display=$("menu").style.display==="block"?"none":"block"};$("blockButton").onclick=blockPartner;$("reportButton").onclick=reportPartner;
 initialize();
 </script>
 </body>
