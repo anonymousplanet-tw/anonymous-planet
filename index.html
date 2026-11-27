@@ -4,31 +4,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>匿名星球</title>
+<title>匿名聊聊</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f5f3fb;color:#29263b;font-family:Arial,"Microsoft JhengHei",sans-serif}
 header{background:#fff;padding:18px 7%;font-size:22px;font-weight:bold;color:#7658df;box-shadow:0 2px 10px #00000008}
-main{max-width:1000px;margin:35px auto;padding:0 16px}
-h1{font-size:28px}
+main{max-width:760px;margin:35px auto;padding:0 16px}
+h1{font-size:27px}
+h2{font-size:19px}
 .muted{color:#888}
-.layout{display:grid;grid-template-columns:300px 1fr;gap:18px}
-.card{background:white;border-radius:16px;padding:22px;box-shadow:0 5px 25px #00000008}
+.card{background:white;border-radius:16px;padding:24px;box-shadow:0 5px 25px #00000008}
 label{display:block;font-weight:bold;font-size:14px;margin:17px 0 7px}
-input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font-size:15px}
-button{cursor:pointer;border:0;border-radius:9px;padding:12px}
+input{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font-size:15px}
+button{cursor:pointer;border:0;border-radius:9px;padding:12px;font-size:14px}
+button:disabled{opacity:.5;cursor:not-allowed}
 .primary{width:100%;background:#7658df;color:white;font-weight:bold;margin-top:20px}
 .secondary{background:#eee;color:#444}
 .danger{background:#fff0f0;color:#c33}
-button:disabled{opacity:.5;cursor:not-allowed}
 .options{display:flex;gap:7px}
 .options button{flex:1;background:#f4f4f4}
 .options button.active{background:#eee8ff;color:#7658df;outline:1px solid #7658df}
 .status{background:#f5f3fb;padding:13px;border-radius:9px;margin-top:16px;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.hidden{display:none!important}
+#setupPage{max-width:500px;margin:auto}
+#chatPage{max-width:700px;margin:auto}
 .chat{min-height:540px;display:flex;flex-direction:column}
-.chathead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.chathead h2{font-size:18px}
+.chathead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.chathead h2{margin:0 0 6px}
 .messages{flex:1;min-height:300px;max-height:430px;overflow:auto;padding:12px 0}
 .bubble{background:#f0edf9;border-radius:12px;padding:10px 13px;margin:9px 0;max-width:85%;width:fit-content;overflow-wrap:anywhere;white-space:pre-wrap}
 .mine{background:#7658df;color:white;margin-left:auto}
@@ -36,22 +39,35 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .sendrow{display:flex;gap:8px}
 .sendrow input{flex:1;min-width:0}
 .sendrow button{background:#7658df;color:white}
-.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.actions button{font-size:12px}
-.hidden{display:none!important}
+.chat-actions{display:flex;gap:8px;margin-top:12px}
+.chat-actions button{flex:1}
+.menu-wrap{position:relative}
+.menu-button{width:34px;height:34px;padding:0;border-radius:50%;background:#f0edf9;color:#7658df;font-size:20px;font-weight:bold}
+.menu-dropdown{position:absolute;right:0;top:42px;background:white;min-width:145px;padding:7px;border-radius:10px;box-shadow:0 5px 20px #0002;z-index:10}
+.menu-dropdown button{width:100%;text-align:left;background:white;padding:11px}
+.menu-dropdown button:hover{background:#f5f3fb}
+.menu-dropdown .danger-text{color:#c33}
 footer{text-align:center;color:#aaa;padding:30px;font-size:12px}
-@media(max-width:700px){main{margin:22px auto}.layout{grid-template-columns:1fr}.chat{min-height:470px}}
+@media(max-width:700px){
+ main{margin:22px auto}
+ .card{padding:19px}
+ .chat{min-height:470px}
+ .messages{min-height:270px}
+}
 </style>
 </head>
 <body>
-<header>✦ 匿名星球</header>
+
+<header>✦ 匿名聊聊</header>
 
 <main>
+
+<!-- 第一頁：配對設定 -->
+<section id="setupPage">
 <h1>遇見一個陌生人</h1>
 <p class="muted">不用真實姓名，從一段聊天開始認識彼此。</p>
 
-<div class="layout">
-<section class="card">
+<div class="card">
 <h2>配對設定</h2>
 
 <label>匿名暱稱</label>
@@ -72,22 +88,37 @@ footer{text-align:center;color:#aaa;padding:30px;font-size:12px}
 </div>
 
 <button class="primary" id="start" disabled>正在連接...</button>
-<button class="secondary hidden" id="leave" style="width:100%;margin-top:10px">離開聊天室</button>
 
 <div class="status" id="status">正在初始化匿名登入...</div>
+</div>
 </section>
 
-<section class="card chat">
+<!-- 第二頁：聊天 -->
+<section id="chatPage" class="hidden">
+<div class="card chat">
+
 <div class="chathead">
 <div>
 <h2 id="roomTitle">匿名聊天室</h2>
-<div class="muted" id="partnerInfo">尚未配對</div>
+<div class="muted" id="partnerInfo">正在尋找聊天對象</div>
 </div>
-<span class="muted" id="roomState">等待中</span>
+
+<div style="display:flex;align-items:center;gap:10px">
+<span class="muted" id="roomState">配對中</span>
+
+<div class="menu-wrap">
+<button class="menu-button" id="menuButton" title="更多選項">!</button>
+
+<div class="menu-dropdown hidden" id="menuDropdown">
+<button id="report">⚑ 檢舉對方</button>
+<button id="block" class="danger-text">⊘ 封鎖對方</button>
+</div>
+</div>
+</div>
 </div>
 
 <div class="messages" id="messages">
-<p class="muted" style="text-align:center;margin-top:100px">配對成功後，就能在這裡聊天。</p>
+<p class="muted" style="text-align:center;margin-top:100px">正在尋找聊天對象，請稍候...</p>
 </div>
 
 <div id="sendArea" class="hidden">
@@ -95,17 +126,22 @@ footer{text-align:center;color:#aaa;padding:30px;font-size:12px}
 <input id="messageInput" maxlength="2000" placeholder="輸入訊息...">
 <button id="send">傳送</button>
 </div>
-<div class="actions">
-<button class="secondary" id="refreshMessages">重新載入訊息</button>
-<button class="danger" id="block">封鎖對方</button>
-<button class="danger" id="report">檢舉對方</button>
 </div>
+
+<div class="chat-actions">
+<button class="secondary hidden" id="refreshMessages">重新載入訊息</button>
+<button class="danger hidden" id="leave">離開聊天室</button>
+<button class="primary" id="findAgain">重新尋找聊天對象</button>
+</div>
+
+<div class="status" id="chatStatus">準備開始配對...</div>
+
 </div>
 </section>
-</div>
+
 </main>
 
-<footer>匿名星球 · 讓每一次相遇，都從聊天開始</footer>
+<footer>匿名聊聊 · 讓每一次相遇，都從聊天開始</footer>
 
 <script>
 const SUPABASE_URL = "https://rxeolvxuvhysvgwvnkmu.supabase.co";
@@ -132,6 +168,15 @@ function setStatus(text) {
   $("status").textContent = text;
 }
 
+function setChatStatus(text) {
+  $("chatStatus").textContent = text;
+}
+
+function showPage(page) {
+  $("setupPage").classList.toggle("hidden", page !== "setup");
+  $("chatPage").classList.toggle("hidden", page !== "chat");
+}
+
 function choose(container, callback) {
   $(container).querySelectorAll("button").forEach(button => {
     button.onclick = () => {
@@ -148,7 +193,8 @@ choose("seeking", value => seeking = value);
 function setChatMode(active) {
   $("sendArea").classList.toggle("hidden", !active);
   $("leave").classList.toggle("hidden", !active);
-  $("start").classList.toggle("hidden", active);
+  $("refreshMessages").classList.toggle("hidden", !active);
+  $("findAgain").classList.toggle("hidden", active);
 }
 
 function removeRoomSubscriptions() {
@@ -180,8 +226,9 @@ function resetChat() {
   $("partnerInfo").textContent = "尚未配對";
   $("roomState").textContent = "等待中";
   $("messages").innerHTML =
-    '<p class="muted" style="text-align:center;margin-top:100px">配對成功後，就能在這裡聊天。</p>';
+    '<p class="muted" style="text-align:center;margin-top:100px">準備尋找下一位聊天對象。</p>';
 
+  $("menuDropdown").classList.add("hidden");
   setChatMode(false);
 }
 
@@ -200,7 +247,7 @@ async function initialize() {
 
     $("start").disabled = false;
     $("start").textContent = "開始尋找聊天對象";
-    setStatus("匿名登入成功，正在檢查是否有未結束的聊天室。");
+    setStatus("匿名登入成功，可以開始配對。");
 
     await restoreRoom();
 
@@ -325,12 +372,11 @@ function subscribeMessages() {
     })
     .subscribe(status => {
       if (status === "CHANNEL_ERROR") {
-        setStatus("即時訊息連線發生問題，請重新載入訊息。");
+        setChatStatus("即時訊息連線發生問題，請重新載入訊息。");
       }
     });
 }
 
-/* 對方離開時，保留畫面上的歷史訊息 */
 function handlePartnerLeft() {
   if (!roomId) return;
 
@@ -340,26 +386,27 @@ function handlePartnerLeft() {
   partnerId = null;
   partnerNickname = "";
 
+  $("roomTitle").textContent = "匿名聊天室";
   $("roomState").textContent = "聊天室已結束";
   $("partnerInfo").textContent = "對方已離開聊天室";
 
   setChatMode(false);
 
-  $("start").disabled = false;
-  $("start").textContent = "重新尋找聊天對象";
+  $("findAgain").disabled = false;
+  $("findAgain").textContent = "重新尋找聊天對象";
 
   const notice = document.createElement("p");
   notice.className = "muted";
   notice.style.textAlign = "center";
   notice.style.padding = "12px";
   notice.textContent = "對方已離開聊天室。你可以重新尋找聊天對象。";
+
   $("messages").appendChild(notice);
   $("messages").scrollTop = $("messages").scrollHeight;
 
-  setStatus("對方已離開，原本的聊天紀錄仍然保留。");
+  setChatStatus("對方已離開，原本的聊天紀錄仍然保留。");
 }
 
-/* 備援檢查：每 3 秒確認聊天室是否仍然有效 */
 async function checkRoomStatus() {
   if (!roomId) return;
 
@@ -378,7 +425,6 @@ async function checkRoomStatus() {
   }
 }
 
-/* 監聽 rooms 資料表的 UPDATE */
 function subscribeRoomStatus() {
   if (roomChannel) {
     db.removeChannel(roomChannel);
@@ -409,14 +455,17 @@ function subscribeRoomStatus() {
 async function openRoom() {
   await getPartner();
 
+  showPage("chat");
   $("roomState").textContent = "已配對";
   setChatMode(true);
+
+  $("findAgain").disabled = false;
 
   await loadMessages();
   subscribeMessages();
   subscribeRoomStatus();
 
-  setStatus("聊天室已連線，可以開始聊天。");
+  setChatStatus("聊天室已連線，可以開始聊天。");
 }
 
 async function restoreRoom() {
@@ -430,6 +479,7 @@ async function restoreRoom() {
       return;
     }
 
+    showPage("setup");
     $("start").disabled = false;
     $("start").textContent = "開始尋找聊天對象";
     setStatus("目前沒有進行中的聊天室，可以開始配對。");
@@ -452,18 +502,25 @@ async function findMatch() {
     if (data.status === "matched") {
       searching = false;
       clearTimeout(pollTimer);
+      pollTimer = null;
 
       roomId = data.room_id;
-      $("start").disabled = true;
-
       await openRoom();
       return;
     }
 
     if (data.status === "waiting") {
-      setStatus("正在尋找符合條件的真人使用者...");
+      showPage("chat");
+      $("roomTitle").textContent = "正在尋找聊天對象";
+      $("partnerInfo").textContent = "請稍候，正在為你配對真人使用者";
+      $("roomState").textContent = "配對中";
+
       $("messages").innerHTML =
         '<p class="muted" style="text-align:center;margin-top:100px">正在尋找聊天對象，請稍候...</p>';
+
+      setChatMode(false);
+      $("findAgain").disabled = true;
+      setChatStatus("正在尋找符合條件的真人使用者...");
 
       pollTimer = setTimeout(findMatch, 3000);
       return;
@@ -475,31 +532,64 @@ async function findMatch() {
     console.error(e);
     searching = false;
 
+    $("findAgain").disabled = false;
+    $("findAgain").textContent = "重新尋找聊天對象";
     $("start").disabled = false;
-    $("start").textContent = "重新開始";
-    setStatus("配對失敗：" + e.message);
+
+    setChatStatus("配對失敗：" + e.message);
   }
 }
 
-$("start").onclick = async () => {
-  $("start").disabled = true;
+async function beginMatching(fromSetup) {
+  if (searching) return;
 
   try {
-    await saveProfile();
+    if (fromSetup) {
+      await saveProfile();
+    }
+
+    if (pollTimer) {
+      clearTimeout(pollTimer);
+      pollTimer = null;
+    }
+
+    resetChat();
+    showPage("chat");
 
     searching = true;
-    $("start").textContent = "配對中...";
-    setStatus("正在尋找聊天對象，請稍候。");
+
+    $("roomTitle").textContent = "正在尋找聊天對象";
+    $("partnerInfo").textContent = "請稍候，正在為你配對真人使用者";
+    $("roomState").textContent = "配對中";
+    $("messages").innerHTML =
+      '<p class="muted" style="text-align:center;margin-top:100px">正在尋找聊天對象，請稍候...</p>';
+
+    $("findAgain").disabled = true;
+    $("findAgain").textContent = "配對中...";
+    $("start").disabled = true;
+
+    setChatMode(false);
+    setChatStatus("正在尋找符合條件的真人使用者...");
 
     await findMatch();
 
   } catch (e) {
     searching = false;
     $("start").disabled = false;
-    $("start").textContent = "開始尋找聊天對象";
-    setStatus(e.message);
+    $("findAgain").disabled = false;
+    $("findAgain").textContent = "重新尋找聊天對象";
+
+    if (fromSetup) {
+      showPage("setup");
+      setStatus(e.message);
+    } else {
+      setChatStatus(e.message);
+    }
   }
-};
+}
+
+$("start").onclick = () => beginMatching(true);
+$("findAgain").onclick = () => beginMatching(false);
 
 async function sendMessage() {
   const content = $("messageInput").value.trim();
@@ -538,9 +628,9 @@ $("messageInput").addEventListener("keydown", e => {
 $("refreshMessages").onclick = async () => {
   try {
     await loadMessages();
-    setStatus("訊息已重新載入。");
+    setChatStatus("訊息已重新載入。");
   } catch (e) {
-    setStatus("讀取訊息失敗：" + e.message);
+    setChatStatus("讀取訊息失敗：" + e.message);
   }
 };
 
@@ -558,19 +648,38 @@ $("leave").onclick = async () => {
     }
 
     resetChat();
+    showPage("chat");
 
-    $("start").classList.remove("hidden");
-    $("start").disabled = false;
-    $("start").textContent = "重新尋找聊天對象";
     $("roomState").textContent = "已離開";
-    setStatus("已離開聊天室，聊天紀錄仍保留。");
+    $("partnerInfo").textContent = "你已離開上一個聊天室";
+    $("findAgain").disabled = false;
+    $("findAgain").textContent = "重新尋找聊天對象";
+
+    setChatStatus("已離開聊天室，聊天紀錄仍保留。");
 
   } catch (e) {
     alert("離開失敗：" + e.message);
   }
 };
 
+/* 右上角驚嘆號選單 */
+$("menuButton").onclick = e => {
+  e.stopPropagation();
+  $("menuDropdown").classList.toggle("hidden");
+};
+
+$("menuDropdown").onclick = e => {
+  e.stopPropagation();
+};
+
+document.addEventListener("click", () => {
+  $("menuDropdown").classList.add("hidden");
+});
+
+/* 封鎖 */
 $("block").onclick = async () => {
+  $("menuDropdown").classList.add("hidden");
+
   if (!partnerId) {
     alert("目前無法取得對方資料。");
     return;
@@ -593,7 +702,10 @@ $("block").onclick = async () => {
   }
 };
 
+/* 檢舉 */
 $("report").onclick = async () => {
+  $("menuDropdown").classList.add("hidden");
+
   if (!partnerId || !roomId) {
     alert("目前無法取得對方資料。");
     return;
