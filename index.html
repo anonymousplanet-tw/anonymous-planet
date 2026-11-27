@@ -54,7 +54,7 @@ let soundEnabled=localStorage.getItem('anonymous-chat-sound')!=='off';
 let audioContext=null;
 function updateSoundToggle(){const b=$('soundToggle');b.textContent=soundEnabled?'🔔 音效開':'🔕 音效關';b.setAttribute('aria-pressed',String(soundEnabled))}
 function unlockSound(){if(!soundEnabled)return;try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;if(!audioContext)audioContext=new AudioCtx();if(audioContext.state==='suspended')audioContext.resume().catch(()=>{})}catch(e){console.warn('音效無法啟用',e)}}
-function playIncomingSound(){if(!soundEnabled)return;try{if(!audioContext||audioContext.state!=='running')return;const t=audioContext.currentTime;for(const [delay,freq] of [[0,880],[0.12,1174.66]]){const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,t+delay);gain.gain.setValueAtTime(0.0001,t+delay);gain.gain.exponentialRampToValueAtTime(0.1275,t+delay+0.018);gain.gain.exponentialRampToValueAtTime(0.0001,t+delay+0.19);osc.connect(gain);gain.connect(audioContext.destination);osc.start(t+delay);osc.stop(t+delay+0.2)}}catch(e){console.warn('播放提示音失敗',e)}}
+function playIncomingSound(){if(!soundEnabled)return;try{if(!audioContext||audioContext.state!=='running')return;const t=audioContext.currentTime;for(const [delay,freq] of [[0,880],[0.12,1174.66]]){const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,t+delay);gain.gain.setValueAtTime(0.0001,t+delay);gain.gain.exponentialRampToValueAtTime(0.19125,t+delay+0.018);gain.gain.exponentialRampToValueAtTime(0.0001,t+delay+0.19);osc.connect(gain);gain.connect(audioContext.destination);osc.start(t+delay);osc.stop(t+delay+0.2)}}catch(e){console.warn('播放提示音失敗',e)}}
 // 配對成功使用獨立的上行雙音；音效開關與訊息通知共用。
 function playMatchedSound(){
  if(!soundEnabled)return;
@@ -65,7 +65,7 @@ function playMatchedSound(){
    const osc=audioContext.createOscillator(),gain=audioContext.createGain();
    osc.type='sine';osc.frequency.setValueAtTime(freq,t+delay);
    gain.gain.setValueAtTime(0.0001,t+delay);
-   gain.gain.exponentialRampToValueAtTime(0.1125,t+delay+0.025);
+   gain.gain.exponentialRampToValueAtTime(0.16875,t+delay+0.025);
    gain.gain.exponentialRampToValueAtTime(0.0001,t+delay+duration);
    osc.connect(gain);gain.connect(audioContext.destination);
    osc.start(t+delay);osc.stop(t+delay+duration+0.01);
@@ -100,7 +100,7 @@ async function findMatch(run){if(!searching||run!==matchRunId)return;try{const {
 async function beginMatching(fromSetup){if(searching)return;if(fromSetup){try{await saveProfile()}catch(e){alert(e.message);return}}resetChat();searching=true;queueMayExist=true;const run=++matchRunId;showWaiting();findMatch(run)}
 async function stopMatching(){searching=false;matchRunId++;clearTimers();if(!queueMayExist){showSetup();return}try{const {data,error}=await db.rpc("cancel_match");if(error)throw error;if(data?.status==="matched"){queueMayExist=false;await openRoom();playMatchedSound();return}queueMayExist=false;showSetup()}catch(e){alert("取消配對失敗："+e.message+"。請再按一次取消。");showWaiting()}}
 async function sendMessage(){if(roomEnded||!roomId)return;const content=$("messageInput").value.trim();if(!content)return;$("sendButton").disabled=true;const {error}=await db.from("messages").insert({room_id:roomId,sender_id:user.id,content});$("sendButton").disabled=false;if(error){alert("訊息傳送失敗："+error.message);return}$("messageInput").value=""}
-async function leaveRoom(){if(!roomEnded){const {error}=await db.rpc("leave_room");if(error){alert("離開聊天室失敗："+error.message);return}}resetChat();showSetup()}
+async function leaveRoom(){if(!roomEnded){const {error}=await db.rpc("chat_leave_room",{p_room_id:roomId});if(error){alert("離開聊天室失敗："+error.message);return}}resetChat();showSetup()}
 async function blockPartner(){if(!partnerId)return;if(!confirm("確定封鎖這位對象？"))return;const {error}=await db.from("blocks").insert({blocker_id:user.id,blocked_id:partnerId});if(error){alert("封鎖失敗："+error.message);return}alert("已封鎖");await leaveRoom()}
 async function reportPartner(){if(!partnerId||!roomId)return;const reason=prompt("請輸入檢舉原因：");if(!reason?.trim())return;const {error}=await db.from("reports").insert({reporter_id:user.id,reported_user_id:partnerId,room_id:roomId,reason:reason.trim(),details:""});if(error){alert("檢舉失敗："+error.message);return}alert("檢舉已送出")}
 $("startButton").onclick=()=>beginMatching(true);$("cancelButton").onclick=stopMatching;$("sendButton").onclick=sendMessage;$("messageInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendMessage()}});$("leaveButton").onclick=leaveRoom;$("endedLeaveButton").onclick=leaveRoom;$("menuButton").onclick=()=>{$("menu").style.display=$("menu").style.display==="block"?"none":"block"};$("blockButton").onclick=blockPartner;$("reportButton").onclick=reportPartner;
