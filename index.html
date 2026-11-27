@@ -32,7 +32,6 @@ footer{text-align:center;color:#aaa;padding:30px;font-size:12px}
 </head>
 <body>
 <header>✦ 匿名星球</header>
-
 <main>
 <h1>遇見一個陌生人</h1>
 <p class="sub">不用真實姓名，從一段聊天開始認識彼此。</p>
@@ -112,13 +111,17 @@ choose("seeking", value => seeking = value);
 
 function message(title, detail) {
   $("chat").innerHTML = "";
+
   const div = document.createElement("div");
   div.style.textAlign = "center";
   div.style.margin = "auto";
+
   const strong = document.createElement("strong");
   strong.textContent = title;
+
   const p = document.createElement("p");
   p.textContent = detail;
+
   div.append(strong, p);
   $("chat").appendChild(div);
 }
@@ -139,6 +142,7 @@ async function initialize() {
     $("status").textContent = "匿名登入成功，可以開始配對。";
     $("start").disabled = false;
     $("start").textContent = "開始尋找聊天對象";
+
   } catch (error) {
     console.error(error);
     $("status").textContent = "連線失敗：" + error.message;
@@ -161,6 +165,26 @@ async function saveProfile() {
   if (error) throw error;
 }
 
+async function showMatchedNickname() {
+  const {data, error} = await db.rpc("get_match_nickname");
+
+  if (error) throw error;
+
+  if (data.status === "matched" && data.nickname) {
+    $("roomTitle").textContent = "正在與 " + data.nickname + " 聊天";
+    message(
+      "🎉 真人配對成功！",
+      "你配對到的對象是：" + data.nickname + "。聊天訊息功能接下來開發。"
+    );
+  } else {
+    $("roomTitle").textContent = "配對成功！";
+    message(
+      "🎉 真人配對成功！",
+      "聊天室已建立，但暫時無法讀取對方暱稱。"
+    );
+  }
+}
+
 async function findMatch() {
   if (!searching) return;
 
@@ -174,12 +198,9 @@ async function findMatch() {
 
       $("start").disabled = false;
       $("start").textContent = "重新配對";
-      $("roomTitle").textContent = "配對成功！";
       $("status").textContent = "已找到聊天對象。";
-      message(
-        "🎉 真人配對成功！",
-        "聊天室已建立，訊息傳送功能還在開發中。"
-      );
+
+      await showMatchedNickname();
       return;
     }
 
@@ -195,6 +216,7 @@ async function findMatch() {
   } catch (error) {
     console.error(error);
     searching = false;
+
     $("start").disabled = false;
     $("start").textContent = "重新開始";
     $("status").textContent = "配對失敗：" + error.message;
@@ -213,10 +235,13 @@ $("start").onclick = async () => {
     searching = true;
     $("start").textContent = "配對中...";
     $("status").textContent = "正在連接真人配對服務...";
+
     await findMatch();
 
   } catch (error) {
     console.error(error);
+
+    searching = false;
     $("start").disabled = false;
     $("start").textContent = "開始尋找聊天對象";
     $("status").textContent = error.message;
